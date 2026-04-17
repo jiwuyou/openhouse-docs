@@ -53,6 +53,20 @@ http://127.0.0.1:8765/
 
 后续如果需要，我可以继续补：
 
-- GitHub Actions 自动构建
-- GitHub Pages 自动发布
 - 自定义域名配置
+
+## GitHub Pages
+
+仓库已经包含自动发布工作流：
+
+- [pages.yml](/root/openhouse-docs/.github/workflows/pages.yml)
+
+推到 GitHub 之后，建议在仓库设置中启用：
+
+- `Settings -> Pages -> Build and deployment -> Source: GitHub Actions`
+
+之后每次向 `main` 分支推送，都会自动：
+
+- 安装依赖
+- 构建 `site/`
+- 发布到 GitHub Pages
