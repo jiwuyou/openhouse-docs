@@ -1,19 +1,57 @@
 # OpenHouse Docs
 
-这个仓库单独存放 OpenHouse 的对外使用文档。
+这个仓库是 OpenHouseAI 的公开版用户与 AI 文档源。
 
 目标：
 
 - 单独维护用户说明与 AI 使用说明
 - 独立发布静态文档站
-- 不和 `termux-app` 主仓库耦合
+- 给 APK 提供 `openhouse/docs-public` 内置文档快照
+- 允许用户不等待新 APK，直接更新公开文档并同步到本机运行期路径
 
 ## 目录结构
 
 - `docs/`：Markdown 源文档
 - `docs/assets/`：文档图片等静态资源
+- `scripts/sync-runtime-docs.sh`：把当前仓库文档同步到本机 OpenHouse 运行期路径
+- `scripts/sync-to-apk-assets.sh`：把当前仓库文档同步到 APK `docs-public` 快照目录
 - `scripts/build_docs_site.py`：把 Markdown 构建成 HTML 站点
 - `site/`：生成后的静态站点目录
+
+## 与 APK 的关系
+
+APK 内置文档快照路径：
+
+```text
+/root/projects/smallphoneai/openhouseai-app/app/src/main/assets/openhouse/docs-public
+```
+
+发布 APK 前，从本仓库同步快照：
+
+```bash
+scripts/sync-to-apk-assets.sh
+```
+
+APK 中的 `openhouse/docs-public` 是本仓库 `docs/` 的发布快照，不是长期编辑源。
+只改文档时，先改本仓库，再同步 APK 快照。
+
+用户安装 APK 后，文档会被同步到：
+
+```text
+/root/openhouse/docs
+/root/openhouseai-docs/official
+```
+
+如果只是文档更新，用户可以不等新 APK：
+
+```bash
+git clone https://github.com/jiwuyou/openhouse-docs.git /root/openhouse-docs
+cd /root/openhouse-docs
+git pull --ff-only
+scripts/sync-runtime-docs.sh
+```
+
+这条路径只刷新文档，不要求重新安装 APK，也不修改用户项目、模型配置或运行时数据。
 
 ## 本地构建
 

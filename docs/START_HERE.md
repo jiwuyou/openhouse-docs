@@ -1,31 +1,176 @@
-# OpenHouse Start Here
+# 从这里开始
 
-你当前面对的是 OpenHouse 的最小官方说明。
+OpenHouseAI 是一个装在手机里的人机协作平台。它不是单纯的聊天软件，也不是单纯的终端，而是让用户和 AI 在同一个环境里共同使用软件、终端、文件、服务和工具。
 
-## 你运行在哪里
+## 建议阅读顺序
 
-你运行在 Android 手机上的 Ubuntu 用户空间中。
+安装完成后的官方文档目录是：
 
-这套 Ubuntu 不是独立虚拟机，而是运行在 Termux 之上，通常通过 `proot-distro` 进入。
+```text
+/root/openhouse/docs
+/root/openhouseai-docs/official
+~/openhouseai-docs/official
+```
 
-## 先确认的事实
+pi-web 默认提示词应优先引用 `/root/openhouse/docs` 下的稳定文档路径；`/root/openhouseai-docs/official` 是兼容旧路径。源码里的同名 Markdown 文件会被同步到运行期文档目录。
 
-- Termux 主目录基础路径：`/data/data/com.termux/files/home`
-- 当前 Ubuntu 依赖 Termux 提供的宿主环境
-- OpenHouse 官方文档由维护器同步到 Termux 主目录下的文档目录
+## 文档更新通道
 
-## 你首先该看什么
+APK 会内置一份离线可用的公开文档快照。公开文档源仓库是：
 
-1. 阅读 `AGENT_GUIDE.md`
-2. 阅读 `PATHS_AND_PORTS.md`
-3. 如需判断实际环境，再查看 Ubuntu 中是否能访问这些路径
-4. 如果你是用户，请阅读 `USER_GUIDE.md`
-5. 如果你准备给 AI 配置按需调用的环境 skill，请阅读 `ENV_SKILL.md`
-6. 如果你需要规则、常见问题或排障说明，请继续阅读 `OFFICIAL_RULES.md`、`FAQ.md` 和 `TROUBLESHOOTING.md`
+```text
+https://github.com/jiwuyou/openhouse-docs
+```
 
-## 最重要的约定
+如果只是文档更新，用户和 AI agent 可以不等待新 APK，直接更新公开文档仓库并同步到运行期路径：
 
-- 这是一个基于 Termux 的 Ubuntu 环境
-- 优先使用产品明确提供的固定路径
-- 不要默认扫描整个 Termux 主目录
-- 如官方文档与其他笔记冲突，以官方文档为准
+```bash
+git clone https://github.com/jiwuyou/openhouse-docs.git /root/openhouse-docs 2>/dev/null || true
+cd /root/openhouse-docs
+git pull --ff-only
+scripts/sync-runtime-docs.sh
+```
+
+这只刷新 `/root/openhouse/docs`、`/root/openhouseai-docs/official` 等文档路径，不会重装 APK，也不会删除用户数据。
+
+## 如果你只想开始使用
+
+普通用户首次使用优先阅读：
+
+1. `openhouse-overview.md`
+   - 用最短路径理解 OpenHouse 是什么、默认核心服务是什么、pi-agent 和 cc/codex 分别做什么。
+2. `first-use-tutorial.md`
+   - 了解首次教学会指向哪里、哪些动作需要用户点击、哪些只是说明。
+3. `pi-agent-first-use.md`
+   - 进入 pi-agent 后，按它的提示配置模型、Claude 或 Codex。
+4. `model-config-migration.md`
+   - 准备 `base_url`、`key/token`、`model id` 和协议类型。
+5. `cloudcli-claude-code-setup.md` 或 `codex-setup.md`
+   - 根据你要先使用 Claude 还是 Codex，完成后置配置和实测。
+6. `OPENHOUSE_DESKTOP.md`
+   - 了解默认入口、桌面横向分页、编辑模式、拖动、改名、改图标和 App 页控制栏。
+
+普通用户不需要先学习终端。终端教学在 `terminal-guide.md`，需要时再看。
+
+## 如果你是 AI agent
+
+AI agent 优先阅读：
+
+1. `ai-reference-index.md`
+2. `openhouse-overview.md`
+3. `AI_AGENT_REFERENCE.md`
+4. `service-manager.md`
+5. `troubleshooting.md`
+
+如果你要实现或审查下一轮代码改动，还必须阅读：
+
+1. `implementation-acceptance-checklist.md`
+2. `openhouse-install-flow.md`
+3. `openhouse-cn-network-retry.md`
+4. `openhouse-runtime-policy.md`
+5. `openhouse-exit-all.md`
+
+## 先认清当前在哪一层
+
+OpenHouse 有三层常见路径，不要混用：
+
+- Ubuntu 内路径：`/root`、`/root/openhouse/docs`、`/root/openhouseai-docs/official`、`/root/projects`。这是主要工作区；pi、pi-web、用户项目，以及后置安装完成后的 Claude Code、Codex、CloudCLI 默认在这里使用。
+- Termux 文件系统真实路径：`/data/data/com.termux/files/home` 和 `/data/data/com.termux/files/usr`。这是 Android 侧 Termux shell 的 home 和 prefix，负责底座、bootstrap、proot-distro 和 Ubuntu 修复。
+- Ubuntu rootfs 在 Termux 中的真实位置：`/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu`。知道这个位置有助于排障，但普通操作不要直接改 rootfs 文件。
+
+OpenHouse 桌面、菜单总览 App 或终端 App 中可进入 Termux 或 Ubuntu 终端，具体入口名称以当前 App 为准。Termux 终端不是 `/root`；它是 Android 侧 Termux shell。安装完成后，Termux 终端可能会自动进入 Ubuntu，因此 AI 和用户排障时应先判断当前层。
+
+快速判断：
+
+```bash
+pwd
+echo "$HOME"
+cat /etc/os-release 2>/dev/null || true
+command -v proot-distro 2>/dev/null || true
+openhouseai-env-probe 2>/dev/null || smallphoneai-env-probe 2>/dev/null || true
+```
+
+如果 `pwd` 或 `$HOME` 是 `/root`，通常在 Ubuntu 内。如果 `$HOME` 是 `/data/data/com.termux/files/home`，通常在 Termux 外层。如果 `cat /etc/os-release` 显示 Ubuntu，则当前命令环境是 Ubuntu。
+
+1. `openhouse-overview.md`
+   - 给用户和 AI 的稳定小写概览，说明首次可用闭环和默认核心服务。
+2. `PRODUCT_OVERVIEW.md`
+   - 先了解这个产品是什么，以及为什么强调人和 AI 共同使用软件。
+3. `CAPABILITIES_MAP.md`
+   - 了解 OpenHouse 能使用哪些能力：Termux、Ubuntu、服务、模型、浏览器、文件、Shizuku 和网络检索。
+4. `USER_SCENARIOS.md`
+   - 了解日常协作、智能操作系统、人生管理、知识库和人机编程等场景。
+5. `WORKBENCH_OPTIONS.md`
+   - 了解为什么 pi-agent 不是唯一主工作台，以及 Claude Code、Codex、Hermes Web 和开源项目如何成为用户自己的工作台。
+6. `first-use-tutorial.md`
+   - 了解首次教学脚本，终端教学为什么后置。
+7. `ENVIRONMENT.md`
+   - 确认当前 Android、Termux、Ubuntu 和默认安装范围。
+8. `PI_AGENT_PLUGIN_SYSTEM.md`
+   - 了解 pi、pi-web、插件目录和默认搜索插件。
+9. `AI_TOOL_POSTINSTALL.md`
+   - 需要后置安装 Codex、Claude Code、CloudCLI 或 Hermes 时，先看这里的脚本入口。
+10. `MODEL_API_SETUP.md`
+   - 需要使用 Codex、Claude Code 或 CloudCLI 时，再配置登录或模型 API。
+11. `OPENHOUSE_FIRST_CONFIGURATION.md`
+   - pi-web 模型可用后，让 pi-agent 完成模型迁移、CloudCLI/Claude Code 配置和连通测试。
+12. `CLOUDCLI_CLAUDE_CODE.md`
+   - 需要让 pi-agent 配置 CloudCLI 中的 Claude Code 时阅读。
+13. `HERMES_SETUP.md`
+   - 需要安装 Hermes 时阅读。Hermes 是可选高级能力，安装和配置会花比较久。
+
+## 给 AI agent 的入口
+
+如果你是 AI agent，优先阅读：
+
+1. `ai-reference-index.md`
+2. `AI_AGENT_REFERENCE.md`
+3. `terminal-guide.md`
+4. `service-manager.md`
+5. `troubleshooting.md`
+
+这些文档说明了默认终端选择、服务控制、故障诊断和禁止操作。
+
+## 默认核心
+
+默认核心能力包括 Termux、Ubuntu、Node、OpenHouse 文档、service-manager、pi-agent、pi-web、openhouse-connect 和 SmallPhone 兼容服务。
+
+Codex、Claude Code、CloudCLI 和 Hermes 是后置 AI 工作能力。用户先进入 pi-agent 完成首次配置；pi-agent 再按 `/root/openhouse/scripts` 中的脚本和本文档引导安装这些能力。
+
+OpenHouse 默认入口可以设为桌面、某个桌面 App 或上次退出页。桌面替代默认菜单心智；旧首页/菜单功能保留为桌面里的“菜单总览”App。桌面是原生横向分页稀疏槽位网格，图标默认只显示图标和名称；点击打开 App，长按空白处或图标进入编辑模式，可拖动、跨屏拖动、拖到末尾新建屏、改名、改图标、隐藏、重置、设为默认入口或进入状态/详情。桌面空位不会自动压紧。打开失败时会自动弹出状态面板。
+
+桌面页不显示顶部控制栏。进入某个 App 后会显示 `左侧栏 / 桌面 / 当前 App 名 / 刷新 / 收起 / 右侧控制栏`；控制栏可以收起为白色到黑色渐变的悬浮球。悬浮球可拖动、吸附左右边并保存位置，点击悬浮球可恢复控制栏。桌面只保存入口元数据和布局，不预创建多个 WebView，也不要求多个 WebView 常驻。
+
+桌面或菜单/侧边栏的一级服务入口至少包括：
+
+- `SmallPhone`
+- `pi-agent`
+- `cc/codex`
+
+`pi-agent` 和 `SmallPhone`、`cc/codex` 同级。`pi-agent` 是首次配置助手、文档索引员和配置迁移执行者。用户可以用它完成 OpenHouse 首次配置，也可以临时让它读取文档、使用插件和处理任务；pi-web 是 `pi-agent` 背后的本地页面运行时，由 service-manager 托管，默认本地地址是 `http://127.0.0.1:30141/`。
+
+OpenHouse 的主工作台由用户自己选择。用户可以继续使用 Claude Code、Codex、Hermes Web，也可以让 AI 搜索、安装和改造其它开源项目，并注册到 service-manager 和侧边栏中。
+
+`cc/codex` 是统一入口，用于 CloudCLI / Claude Code / Codex 相关页面和控制。不要把 CloudCLI、Claude Code、Codex 拆成多个一级入口，除非后续产品注册策略明确改变。
+
+pi-web 首装使用 APK 内置完整 runtime 包，只做解压、校验、注册和启动，不通过 `npm install -g` 安装 pi-web tgz。Node.js、Ubuntu 基础包和其它缺失依赖仍可能需要网络；Codex、Claude Code、CloudCLI 和 Hermes 的网络安装放到 pi-agent 后置引导阶段。
+
+Operit 是 Android 侧完整可选构建能力，不是 APK 默认核心运行时。`withOperit` 包含完整 Operit feature/module 和宿主桥接，`withoutOperit` 不依赖、不暴露 Operit；两个 flavor 的包名都保持 `com.termux`，不能共存，只能同签名且 `versionCode` 单调递增时互相升级或替换。Operit 不是 Ubuntu payload，也不替代 OpenHouse/Pi/AionUi。
+
+OpenCode、Reasonix 等外部工具不是 APK 默认核心能力。Hermes 不进入 APK 默认核心 payload，但可以作为 `pi-agent` 新建会话里的可选高级提示词出现，详见 `HERMES_SETUP.md` 和 `OPTIONAL_EXTERNAL_TOOLS.md`。
+
+## pi-agent 首次配置和新手提示词
+
+`pi-agent` 首次配置任务和新建会话默认提示词应引用这些稳定文档路径：
+
+| 提示词 | 参考文档 | 目标 |
+| --- | --- | --- |
+| 首次 OpenHouse 配置 | `/root/openhouse/docs/OPENHOUSE_FIRST_CONFIGURATION.md`, `/root/openhouse/docs/CLOUDCLI_CLAUDE_CODE.md`, `/root/openhouse/docs/MODEL_API_SETUP.md` | 让 pi-agent 迁移 pi-web 模型配置，测通 CloudCLI 中的 Claude Code。 |
+| 首次使用 | `/root/openhouse/docs/START_HERE.md`, `/root/openhouse/docs/CAPABILITIES_MAP.md`, `/root/openhouse/docs/AI_AGENT_REFERENCE.md` | 让用户理解 OpenHouse 能力、入口、文档和安全边界。 |
+| 后置安装 AI 工具 | `/root/openhouse/docs/AI_TOOL_POSTINSTALL.md`, `/root/openhouse/scripts/check-ai-tools.sh` | 检查并安装 Codex、Claude Code、CloudCLI、Hermes。 |
+| 配置 Claude Code | `/root/openhouse/docs/CLOUDCLI_CLAUDE_CODE.md`, `/root/openhouse/docs/MODEL_API_SETUP.md`, `/root/openhouse/docs/GITHUB_NETWORK_MIRRORS.md` | 按文档配置并测通 CloudCLI 中的 Claude Code；不确定时联网检索。 |
+| 选择主工作台 | `/root/openhouse/docs/WORKBENCH_OPTIONS.md`, `/root/openhouse/docs/SERVICE_MANAGER.md` | 让用户选择 Claude Code、Codex、Hermes Web 或其它开源项目作为长期工作台。 |
+| 安装和配置 Hermes | `/root/openhouse/docs/HERMES_SETUP.md`, `/root/openhouse/docs/OPTIONAL_EXTERNAL_TOOLS.md`, `/root/openhouse/docs/SERVICE_MANAGER.md` | 可选高级能力，耗时较久，使用独立 uv 环境。 |
+| 熟悉 OpenHouse 整个系统 | `/root/openhouse/docs/PRODUCT_OVERVIEW.md`, `/root/openhouse/docs/SERVICE_MANAGER.md`, `/root/openhouse/docs/RECOVERY.md`, `/root/openhouse/docs/AI_AGENT_REFERENCE.md` | 理解系统入口、服务控制、修复和终端分层。 |
+
+首次安装不要求配置默认模型或 API key。安装完成后，用户先在 pi-web 完成模型配置；检测到模型可用后，再点击首次 OpenHouse 配置入口，让 `pi-agent` 根据文档完成模型迁移和 CloudCLI/Claude Code 连通测试。
