@@ -10,6 +10,26 @@ https://github.com/jiwuyou/openhouse-docs
 
 APK 内的 `openhouse/docs-public` 是这个公开仓库的快照。只更新文档时，用户可以直接更新公开仓库并同步到本机运行期路径，不需要等待新 APK。
 
+## 文档事实源和本地落点
+
+长期维护时，`openhouse-docs` 是公开文档的单一事实源。正式内容先改这个仓库的 `docs/`，APK 内置的 `openhouse/docs-public` 只是打包时同步出来的快照，不作为长期手工编辑入口。
+
+在已安装设备上，文档的物理落点优先放在 Termux native home：
+
+```text
+/data/data/com.termux/files/home/openhouseai-docs/official
+```
+
+同步脚本会把 Ubuntu 内的稳定入口做成软链接：
+
+```text
+/root/openhouse/docs
+/root/openhouseai-docs/official
+~/openhouseai-docs/official
+```
+
+因此 AI 和用户平时应优先读取 `/root/openhouse/docs`。排查底层路径或从 Termux 外层维护时，再看 `/data/data/com.termux/files/home/openhouseai-docs/official`。AI 自己产生的笔记不要写进官方文档目录，使用 `openhouseai-docs/agent-notes`。
+
 安装完成后，官方文档目录统一为：
 
 ```text
