@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "memo-openhouse",
+  "service": {
+    "name": "memo-openhouse",
+    "description": "OpenHouse Memo custom app example",
+    "provider": "process",
+    "command": ["node", "src/server.js"],
+    "working_dir": "/root/smallphoneai-repos/smallphone-home/apps/memo-openhouse",
+    "env": {
+      "HOST": "127.0.0.1",
+      "PORT": "23110",
+      "OPENHOUSE_CUSTOM_APP_DATA_DIR": "/root/smallphoneai-repos/smallphone-home/apps/memo-openhouse/data"
+    },
+    "runtime": {},
+    "restart": {
+      "mode": "always",
+      "max_retries": 0
+    },
+    "health": [
+      {
+        "type": "http",
+        "url": "http://127.0.0.1:23110/health",
+        "interval": "30s",
+        "timeout": "5s"
+      }
+    ],
+    "enabled": true,
+    "tags": [
+      "openhouseai",
+      "smallphone",
+      "group:local-stack",
+      "openhouse-component:memo-openhouse",
+      "smallphone-app:memo-openhouse"
+    ]
+  }
+}

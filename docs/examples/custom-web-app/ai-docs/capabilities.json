@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "componentId": "memo-openhouse",
+  "capabilities": [
+    {
+      "id": "open",
+      "description": "Open the OpenHouse Memo WebView app.",
+      "entry": "smallphoneApp.entry"
+    },
+    {
+      "id": "service-control",
+      "description": "Control the app through service-manager.",
+      "serviceRef": "service-manager://services/memo-openhouse",
+      "controls": ["status", "start", "stop", "restart", "logs", "repair"]
+    },
+    {
+      "id": "cli",
+      "description": "Use the JSON-first CLI. This is for AI agents, scripts, and humans. It supports local command mode and HTTP mode.",
+      "commands": [
+        "demo-memo-openhouse health",
+        "demo-memo-openhouse state",
+        "demo-memo-openhouse list",
+        "demo-memo-openhouse add <memo-text>",
+        "demo-memo-openhouse delete <memo-id>",
+        "demo-memo-openhouse --url http://127.0.0.1:23110 state",
+        "demo-memo-openhouse --url http://127.0.0.1:23110 add <memo-text>",
+        "demo-memo-openhouse --url http://127.0.0.1:23110 delete <memo-id>"
+      ]
+    },
+    {
+      "id": "mcp",
+      "description": "Use the MCP stdio server for AI tool discovery and structured calls.",
+      "transport": "stdio",
+      "command": "node /root/smallphoneai-repos/smallphone-home/apps/memo-openhouse/src/mcp-server.js",
+      "tools": [
+        "memo_openhouse_health",
+        "memo_openhouse_state",
+        "memo_openhouse_list_memos",
+        "memo_openhouse_add_memo",
+        "memo_openhouse_delete_memo"
+      ]
+    }
+  ]
+}

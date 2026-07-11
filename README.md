@@ -11,7 +11,7 @@
 
 ## 目录结构
 
-- `docs/`：Markdown 源文档
+- `docs/`：公开文档源，包括 Markdown、示例工程和静态资源
 - `docs/assets/`：文档图片等静态资源
 - `scripts/sync-runtime-docs.sh`：把当前仓库文档同步到本机 OpenHouse 运行期路径
 - `scripts/sync-to-apk-assets.sh`：把当前仓库文档同步到 APK `docs-public` 快照目录

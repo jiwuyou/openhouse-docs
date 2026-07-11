@@ -19,6 +19,13 @@ APK_DOCS_DIR="${OPENHOUSE_APK_DOCS_DIR:-/root/projects/smallphoneai/openhouseai-
 [ -d "$APK_DOCS_DIR" ] || die "Missing APK docs-public directory: $APK_DOCS_DIR"
 
 log "Syncing public docs snapshot to APK assets: $APK_DOCS_DIR"
-find "$APK_DOCS_DIR" -maxdepth 1 -type f -name '*.md' -delete
-cp "$DOCS_DIR"/*.md "$APK_DOCS_DIR"/
+APK_DOCS_PARENT=$(dirname "$APK_DOCS_DIR")
+APK_DOCS_TMP="${APK_DOCS_DIR}.tmp.$$"
+
+mkdir -p "$APK_DOCS_PARENT"
+rm -rf "$APK_DOCS_TMP"
+mkdir -p "$APK_DOCS_TMP"
+cp -a "$DOCS_DIR/." "$APK_DOCS_TMP/"
+rm -rf "$APK_DOCS_DIR"
+mv "$APK_DOCS_TMP" "$APK_DOCS_DIR"
 log "APK docs snapshot updated."
