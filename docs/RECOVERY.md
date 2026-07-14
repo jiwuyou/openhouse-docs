@@ -18,7 +18,9 @@
 | --- | --- |
 | Termux home | `/data/data/com.termux/files/home` |
 | Termux prefix | `/data/data/com.termux/files/usr` |
-| Bootstrap | `$HOME/.smallphoneai-bootstrap/bootstrap.sh` |
+| Bootstrap | 最新 `$HOME/.local/share/openhouseai/update-resources/apk-*/bootstrap/bootstrap.sh` |
+| APK 待处理标记 | `$HOME/.local/share/openhouseai/update-resources/PENDING_APK_RESOURCES.json` |
+| APK payload | 最新 `$HOME/.local/share/openhouseai/update-resources/apk-*/product-payloads` |
 | 安装日志 | `$HOME/.maintainer-logs` |
 | 运行日志 | `$HOME/.smallphoneai/logs` |
 | OpenHouse 文档 | `$HOME/openhouseai-docs/official` |
@@ -65,10 +67,16 @@
 
 ```bash
 openhouseai-env-probe 2>/dev/null || smallphoneai-env-probe 2>/dev/null || true
-cd "$HOME/.smallphoneai-bootstrap" && bash bootstrap.sh status
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+(cd "$resource_dir/bootstrap" && bash bootstrap.sh status)
+cat "$HOME/.local/share/openhouseai/update-resources/PENDING_APK_RESOURCES.json" 2>/dev/null || true
+sed -n '1,220p' "$resource_dir/product-payloads/manifest.json" 2>/dev/null || true
 ls -la "$HOME/.maintainer-logs" "$HOME/.smallphoneai/logs" 2>/dev/null || true
 tail -n 160 "$HOME/.maintainer-logs/manifest_full.log" 2>/dev/null || true
 ```
+
+如果首次安装失败，先看 runtime report。它能快速回答：APK 是否是预期版本、payload tree 是否更新、`service-manager` / `pi-agent` / `pi-web` / `aionui-web` 是否来自同一批 manifest，以及 registry API 版本是否已声明。
 
 判断 Ubuntu 是否可用：
 
@@ -97,25 +105,41 @@ curl -fsS --max-time 2 "${SM_URL%/}/api/v1/health"
 如果 Termux 可用，但 service-manager、pi-agent 或 pi-web 不可用，先尝试启动：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh start
 ```
 
 如果启动失败，执行运行栈修复：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh repair
 ```
 
 完成后重新读取状态：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh status
 ```
 
 期望最终 JSON 中 `ready` 为 `true`。如果只有某个服务失败，不要重装系统，先查看该服务日志。
+
+pi-web 首装问题的优先排查点：
+
+```bash
+ls -l "$HOME/.config/openhouseai/service-manager/services.d/pi-web.json" 2>/dev/null || true
+service-manager status pi-web 2>/dev/null || true
+tail -n 160 "$HOME/.smallphoneai/logs/service-manager.log" 2>/dev/null || true
+```
+
+如果 `pi-web.json` 是 0 字节，说明注册脚本或 payload 有问题，不要通过反复重装 Ubuntu 解决；应更新 APK/payload 或执行运行控制修复入口。
 
 ## 恢复 Ubuntu
 
@@ -139,7 +163,9 @@ proot-distro login ubuntu -- bash -lc 'apt update'
 如果 Ubuntu 可以进入但核心工具缺失，按缺失项执行最小阶段：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh ubuntu-packages
 bash bootstrap.sh node
 bash bootstrap.sh codex

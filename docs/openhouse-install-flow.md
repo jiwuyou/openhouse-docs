@@ -36,14 +36,14 @@
 | --- | --- | --- |
 | Termux home | `/data/data/com.termux/files/home` | Android 侧 Termux 主目录。 |
 | Termux prefix | `/data/data/com.termux/files/usr` | Termux 包和命令目录。 |
-| Bootstrap root | `/data/data/com.termux/files/home/.smallphoneai-bootstrap` | APK 释放的安装脚本、assets、阶段状态和日志。 |
+| Bootstrap root | 最新 `/data/data/com.termux/files/home/.local/share/openhouseai/update-resources/apk-*/bootstrap` | APK 释放的版本化安装脚本；使用前必须验证 `bootstrap.sh` 存在。 |
 | Ubuntu root | `/root` | proot-distro Ubuntu 内的 root home。 |
 | OpenHouse docs | `/root/openhouse/docs` | AI 和用户共同读取的正式文档目录。 |
 | OpenHouse scripts | `/root/openhouse/scripts` | 后置安装、检查、修复脚本目录。 |
 | Runtime repos | `/root/smallphoneai-repos` | service-manager、openhouse-connect、smallphone、pi-agent、pi-web 等运行组件。 |
 | service-manager config | `/root/.config/openhouseai/service-manager/config.json` | service-manager 本机配置，包含 auth token，日志和 UI 不得原样打印。 |
-| Stage state | `$TERMUX_HOME/.smallphoneai-bootstrap/state` | 阶段状态、marker、当前 run id。 |
-| Stage logs | `$TERMUX_HOME/.smallphoneai-bootstrap/logs` | 分阶段日志。 |
+| APK pending marker | `$TERMUX_HOME/.local/share/openhouseai/update-resources/PENDING_APK_RESOURCES.json` | 当前 APK 资源是否仍待首次安装或用户 AI 处理。 |
+| Stage logs | `$TERMUX_HOME/.maintainer-logs` | 分阶段维护和安装日志。 |
 
 ## 状态机
 
@@ -135,8 +135,8 @@ safe_error_message
 | `install_termux_node` | Termux native `node --version` 和 `npm --version` 成功；Node major >= 24；npm prefix 和 PATH 写入 Termux profile。 | Termux pkg/apt 失败；Node 不可用；版本不符合；PATH 未生效。 | 30min | `logs/install-termux-node.log` | 使用 Termux 默认源和已有缓存重试。 | 切换到固定国内 Termux 源后重试。 |
 | `runtime_components` | service-manager、pi-agent、pi-web payload sha256 通过；Termux native 服务清单使用稳定 ID；必要脚本可执行。 | payload 缺失；sha256 不匹配；解包失败；组件健康检查失败；注册出同名随机服务。 | 20min | `logs/runtime-components.log` | 使用 APK 内置 payload 重试，仅刷新 OpenHouse 管理目录。 | 使用国内 payload fallback，必须 sha256 通过。 |
 | `start_smallphone` | service-manager API 可访问；`pi-agent`、`pi-web` 至少进入 running 或 configured-waiting 状态。 | service-manager 不可达；核心服务端口不可达；启动命令失败。 | 5min | `logs/start-smallphone.log` | 重启 service-manager 并按稳定 ID 拉起核心服务。 | 同常规重试。 |
-| `install_ubuntu` | `proot-distro login ubuntu -- true` 成功；`~/bin/smallphoneai-env-probe` 在 Ubuntu 内可执行；`openhouse-termux` 可安装。 | rootfs 下载失败；解包失败；proot-distro 安装失败；Ubuntu 登录失败。 | 60min | `logs/install-ubuntu.log` | 使用默认测速结果和缓存重试。 | 使用固定国内 Ubuntu cloud image 路径重试，并校验 rootfs。 |
-| `ubuntu_packages` | Ubuntu 内 `apt-get update` 成功；`openssh-client`、`git`、`gh`、`ripgrep`、`jq` 和基础包可执行或 apt 确认安装。 | apt 源不可达；包冲突；磁盘空间不足。 | 30min | `logs/ubuntu-packages.log` | 使用当前 Ubuntu apt 源重试。 | 写入固定国内 Ubuntu apt 源后重试。 |
+| `install_ubuntu` | `proot-distro login ubuntu -- true` 成功；`~/bin/smallphoneai-env-probe` 在 Ubuntu 内可执行；`openhouse-termux` 可安装。 | rootfs 下载失败；解包失败；proot-distro 安装失败；Ubuntu 登录失败。 | 60min | `logs/install-ubuntu.log` | 按 canonical 四源顺序解析并锁定本次运行的 rootfs 来源，复用断点缓存。 | 使用同一有序故障转移策略，只增加网络重试强度，不固定 USTC 或其它单源。 |
+| `ubuntu_packages` | Ubuntu 内 `apt-get update` 成功；Ubuntu base source 只由 `openhouseai-ubuntu.sources` 提供；`openssh-client`、`git`、`gh`、`ripgrep`、`jq` 和基础包可执行或 apt 确认安装。 | apt 源不可达；出现多个 Ubuntu base source；包冲突；磁盘空间不足。 | 30min | `logs/ubuntu-packages.log` | 复用本次运行 lock，原子写入 canonical source 后重试。 | 使用同一 lock 和有序故障转移策略，只增加 transient failure 的重试强度。 |
 | `entry_ubuntu` | Termux 入口文件存在；模式文件存在；从 Termux 能进入 Ubuntu。 | shell rc 文件不可写；proot-distro login 失败。 | 60s | `logs/entry-ubuntu.log` | 重写 OpenHouse 管理的入口片段。 | 同常规重试。 |
 | `install_node` | Ubuntu 内 `node --version` 和 `npm --version` 成功；版本符合固定版本范围；npm global bin 在 PATH。 | Node 下载失败；解包失败；PATH 未生效；版本不符合。 | 30min | `logs/install-node.log` | 使用默认 Node payload 或默认源重试。 | 使用国内固定 Node mirror 或内置 payload 重试，并校验 sha256。 |
 | `sync_official_docs` | `/root/openhouse/docs` 存在；P0 文档可读；`/root/openhouse/scripts/check-ai-tools.sh` 可执行。 | 文档目录缺失；脚本未同步；权限错误。 | 120s | `logs/sync-official-docs.log` | 重新同步 docs/scripts，不删除用户自有文件。 | 同常规重试。 |
@@ -185,7 +185,7 @@ safe_error_message
 - 从失败阶段继续，不从头安装。
 - 复用已下载且校验通过的缓存。
 - 复用已安装且健康检查通过的组件。
-- 不切换源，除非当前脚本已有自动测速逻辑。
+- 复用本次运行已锁定的 Ubuntu 镜像；没有 lock 时按 canonical 顺序执行有界探测，不按单次测速结果随机排序。
 - 不删除用户配置、模型配置、workspace、日志。
 - 对于健康检查失败的阶段，必须重新执行健康检查，不能只看 marker。
 
@@ -201,9 +201,9 @@ safe_error_message
 
 国内网络重试的语义：
 
-- 使用固定、稳定、少选择的国内路径。
-- 不让用户手动选择多个源。
-- 对 Termux apt、Ubuntu apt、Ubuntu rootfs、Node、npm、payload、GitHub 访问采用固定策略。
+- Ubuntu apt 与 rootfs 仍使用 `TUNA -> NJU -> Ubuntu official -> USTC` 的 canonical 有序故障转移，不固定 USTC；CN 只调整 transient failure 的重试参数。
+- 不让用户手动选择多个源；需要 override 时使用受支持的环境变量，并要求 OPENHOUSEAI/SMALLPHONEAI 双 namespace 一致。
+- 对 Termux apt、Ubuntu apt、Ubuntu rootfs、Node、npm、payload、GitHub 访问采用明确且可审计的策略。
 - 所有下载必须校验 sha256 或使用包管理器签名校验。
 - 失败后保留脱敏日志，供下一轮排障。
 
@@ -314,6 +314,29 @@ Authorization: Bearer ****abcd
 - 可选 cc-switch arm64 二进制版本和 sha256。
 
 任何 payload sha256 不匹配都必须失败，不允许继续。
+
+APK 构建前必须执行 `scripts/validate-openhouse-payloads.sh`。该校验负责：
+
+- 校验 `manifest.json` 与 `payload-manifest.json` 对同一组件的 archive、sha256、size、version 和 platform 是否一致。
+- 校验 APK 内置 payload 文件的实际 sha256 和 size。
+- 解包检查 `pi-web.tar` 的 `scripts/register-service.sh`，拒绝未转义 `$!/$child` 的 unquoted heredoc。
+- 拒绝 pi-web 注册脚本直接覆盖 `$SPEC_PATH` 或 `$COMPONENT_PATH`，避免失败时留下 0 字节 service spec。
+- 检查 `service-manager.tar` 中存在非空 service-manager 二进制。
+
+首次安装日志或 runtime sync marker 必须打印版本摘要：
+
+```text
+APK: versionName/versionCode/packageVariant
+bootstrap: assetCount/treeSha256
+service-manager: version or archive sha
+registryApi: version
+pi-agent: version or archive sha
+pi-web: version or source commit
+aionui-web: version
+compatibility: ok or warning summary
+```
+
+如果 `registryApi` 显示 `unknown`，安装链路不能假设 `/api/v1/registry/apply` 一定兼容，必须保留写入 canonical registry 和 service register API 的兜底路径。
 
 ## 最终 E2E 验收
 

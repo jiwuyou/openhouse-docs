@@ -2,6 +2,8 @@
 
 service-manager 是安装完成后的运行期控制平面。AI agent 管理后台服务时，默认通过 service-manager，而不是直接后台启动进程。
 
+OpenHouseAI 的正式部署基线是：service-manager daemon 运行在 Termux native 层，使用 OpenHouse 专用配置和 token。Ubuntu/proot 里的长期服务由 Termux native service-manager 通过 provider 管理，不在 Ubuntu 内另起一个常驻 service-manager。
+
 ## 角色
 
 service-manager 负责：
@@ -91,6 +93,7 @@ $HOME/.config/openhouseai/service-manager/services.d/*.json
 
 - `name` 是服务 ID，只使用字母、数字、`.`、`_`、`-`。
 - `provider: "termux-process"` 表示 service-manager 在 Termux 原生层启动长期前台服务；需要进入 Ubuntu/proot 的服务才使用 `proot-distro` provider。
+- `provider: "proot-distro"` 表示 service-manager 仍在 Termux native 层运行，但启动命令进入 Ubuntu/proot。服务如果属于非 root Linux 用户，应在 `runtime.user` 中声明该用户。
 - `command` 是结构化 argv 数组，不是 shell 字符串。
 - 被管理命令必须是前台长进程。脚本型服务推荐让 `sh -lc` 作为 supervisor，显式 `wait` 子进程并在 TERM/INT/HUP 时转发停止信号。
 - 不要把脚本型服务注册成 `["openhouse-pi-web-start"]` 或 `["/bin/sh", "/data/data/com.termux/files/home/.local/bin/openhouse-pi-web-start"]`。如果直接跟踪会改写进程标题的 Node/Next 主进程，运行控制容易出现 stale pidfile 或 cmdline mismatch。
@@ -100,7 +103,9 @@ $HOME/.config/openhouseai/service-manager/services.d/*.json
 写入 `services.d` 文件后，需要让 service-manager 重新加载注册目录。service-manager 只在启动时加载 `services.d/*.json`，因此默认做法是回到 bootstrap 重新启动控制平面：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh start
 ```
 
@@ -259,7 +264,9 @@ $HOME/.smallphoneai/logs/service-manager.log
 优先使用 bootstrap 状态，因为它会同时检查 service-manager、pi-web、pi-agent、cc-connect 和端口：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh status
 ```
 
@@ -277,6 +284,21 @@ case "$SM_ADDR" in
 esac
 curl -fsS --max-time 2 "${SM_URL%/}/api/v1/health"
 ```
+
+## 版本和协议定位
+
+APK 会把完整版本化资源放在 `update-resources/apk-*`，并在需要 AI 处理时写入待处理标记。查看最新 payload 摘要：
+
+```bash
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/product-payloads/manifest.json" ] || { echo "未找到可用的 APK payload manifest" >&2; exit 1; }
+cat "$HOME/.local/share/openhouseai/update-resources/PENDING_APK_RESOURCES.json" 2>/dev/null || true
+sed -n '1,220p' "$resource_dir/product-payloads/manifest.json"
+```
+
+摘要至少应包含 APK `versionName/versionCode`、Termux package variant、bootstrap asset tree sha256、`service-manager`、registryApi、`pi-agent`、`pi-web` 和 `aionui-web`。如果 registryApi 仍显示 `unknown`，说明当前 payload manifest 没有声明协议版本，安装脚本必须保留兼容兜底。
+
+构建 APK 前会执行 `scripts/validate-openhouse-payloads.sh`。这个校验会拒绝 sha/size 不一致的 payload，也会拒绝可能把 `pi-web.json` 截断成 0 字节的注册脚本。
 
 查看服务列表：
 
@@ -374,14 +396,18 @@ curl -q -fsS --max-time 10 -X POST -K /tmp/openhouse-sm-curl.cfg "$SM_URL/api/v1
 如果 service-manager 不可访问，先使用 bootstrap 启动：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh start
 ```
 
 如果启动失败，再修复运行栈：
 
 ```bash
-cd "$HOME/.smallphoneai-bootstrap"
+resource_dir=$(find "$HOME/.local/share/openhouseai/update-resources" -mindepth 1 -maxdepth 1 -type d -name 'apk-*' | sort | tail -n 1)
+[ -n "$resource_dir" ] && [ -f "$resource_dir/bootstrap/bootstrap.sh" ] || { echo "未找到可用的 APK bootstrap 资源" >&2; exit 1; }
+cd "$resource_dir/bootstrap"
 bash bootstrap.sh repair
 ```
 
