@@ -139,9 +139,11 @@ bash bootstrap.sh start
 验证：
 
 ```bash
-service-manager list
-service-manager status hermes-webui
+openhouse-system validate
+openhouse-system check hermes 2>/dev/null || true
 ```
+
+如果尚未安装 Hermes subject，按 `SERVICE_MANAGER.md` 的带 token REST API 模板查询 `/api/v1/services` 和 `/api/v1/services/hermes-webui/status`。
 
 ## 注册到菜单
 
@@ -186,13 +188,13 @@ service-manager status hermes-webui
 
 ## 停止和卸载
 
-停止服务：
+先按 `SERVICE_MANAGER.md` 的带 token REST API 模板设置 `SM_URL` 和 `/tmp/openhouse-sm-curl.cfg`，再停止服务：
 
 ```bash
-service-manager stop hermes-webui 2>/dev/null || true
+curl -q -fsS --max-time 10 -X POST \
+  -K /tmp/openhouse-sm-curl.cfg \
+  "$SM_URL/api/v1/services/hermes-webui/stop"
 ```
-
-如果 CLI 不支持 stop 子命令，按 `SERVICE_MANAGER.md` 使用 API 停止。
 
 卸载时先停止服务，再删除可选注册和安装目录：
 
