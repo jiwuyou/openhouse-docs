@@ -74,6 +74,8 @@ scripts/sync-runtime-docs.sh
    - 需要让 AI 帮你做一个自定义前端、桌面 shell 或本地 Web App 时阅读，里面有完整可运行代码样例。
 9. `PATHS_AND_PORTS.md`
    - 需要确认安装路径、服务端口、端口冲突或自定义 App 选端口时阅读。
+10. `SMALLPHONE_FRONT_BETA_DEPLOY.md`
+   - 需要由第二阶段 Agent（默认 AionUI）部署 APK 携带的完整 SmallPhone Front Beta 资源时阅读；包含 Termux service-manager、Ubuntu/proot、22000/22082 和白屏验收。
 
 普通用户不需要先学习终端。终端教学在 `terminal-guide.md`，需要时再看。
 
@@ -165,6 +167,8 @@ openhouse-termux exec -- 'id; echo "$HOME"; echo "$PREFIX"'
    - 需要让 pi-agent 配置 CloudCLI 中的 Claude Code 时阅读。
 16. `HERMES_SETUP.md`
    - 需要安装 Hermes 时阅读。Hermes 是可选高级能力，安装和配置会花比较久。
+17. `SMALLPHONE_FRONT_BETA_DEPLOY.md`
+   - 需要把 APK 更新后的完整 `smallphone.tar` 部署到 SmallPhone 时阅读；不要做少量文件增量覆盖。
 
 ## 给 AI agent 的入口
 
@@ -181,7 +185,7 @@ openhouse-termux exec -- 'id; echo "$HOME"; echo "$PREFIX"'
 
 ## 默认核心
 
-默认核心能力包括 Termux、Ubuntu、Node、OpenHouse 文档、service-manager、pi-agent、pi-web、openhouse-connect 和 SmallPhone 兼容服务。
+默认核心能力包括 Termux、Ubuntu、Node、OpenHouse 文档、service-manager、pi-agent、pi-web、openhouse-connect 和 SmallPhone 兼容服务。SmallPhone Front Beta 的资源随 APK 携带，但 APK 更新只投递资源；实际部署、注册、启动和验收由第二阶段 Agent 完成，默认使用 AionUI。
 
 Codex、Claude Code、CloudCLI 和 Hermes 是后置 AI 工作能力。用户先进入 pi-agent 完成首次配置；pi-agent 再按 `/root/openhouse/scripts` 中的脚本和本文档引导安装这些能力。
 
