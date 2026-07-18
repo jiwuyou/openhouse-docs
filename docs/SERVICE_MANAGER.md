@@ -1,6 +1,6 @@
 # service-manager 操作手册
 
-service-manager 是安装完成后的运行期控制平面。AI agent 管理后台服务时，默认通过 service-manager，而不是直接后台启动进程。本文以 `service-manager 0.3.1` 的正式契约为基线。
+service-manager 是安装完成后的运行期控制平面。AI agent 管理后台服务时，默认通过 service-manager，而不是直接后台启动进程。本文以 `service-manager 0.3.2` 的正式契约为基线。
 
 OpenHouseAI 的正式部署基线是：service-manager daemon 运行在 Termux native 层，使用 OpenHouse 专用配置和 token。Ubuntu/proot 里的长期服务由 Termux native service-manager 通过 provider 管理，不在 Ubuntu 内另起一个常驻 service-manager。
 
@@ -45,7 +45,7 @@ OpenHouseAI 默认读取这个注册目录：
 $HOME/.config/openhouseai/service-manager/services.d/*.json
 ```
 
-这个目录也可以通过 service-manager 配置里的 `service_registry_dir` 覆盖。`services.d/*.json` 会在 `service-manager serve` 启动时加载，并按稳定服务名 upsert 到服务列表。
+这个目录也可以通过 service-manager 配置里的 `service_registry_dir` 覆盖。`services.d/*.json` 会在 OpenHouse canonical daemon 启动时加载，并按稳定服务名 upsert 到服务列表。
 
 一个使用 APK 内置 standalone runtime 的 pi-web 服务示例：
 
@@ -248,18 +248,55 @@ http://127.0.0.1:20087
 $HOME/.config/openhouseai/service-manager/config.json
 ```
 
-兼容读取路径：
+这是 OpenHouse 唯一允许用于 daemon 与 token 的配置。直接启动时必须显式传入同一份配置和其中的
+`listen_addr`：
 
-```text
-$PREFIX/var/lib/proot-distro/installed-rootfs/ubuntu/root/.config/service-manager/config.json
-$HOME/.config/service-manager/config.json
+```bash
+SM_CONFIG="$HOME/.config/openhouseai/service-manager/config.json"
+SM_BIND="$(sed -n 's/.*"listen_addr"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$SM_CONFIG" | head -n 1)"
+[ -n "$SM_BIND" ] || { echo "OpenHouse canonical config 缺少 listen_addr" >&2; exit 1; }
+service-manager serve --config "$SM_CONFIG" --bind "$SM_BIND"
 ```
+
+读取 token 也必须显式使用同一份配置：
+
+```bash
+service-manager token show --config "$SM_CONFIG"
+```
+
+在 OpenHouse 环境中禁止裸运行 `service-manager serve` 或 `service-manager token show`。裸命令会读取
+`$HOME/.config/service-manager/config.json`，从而产生第二份配置、第二个 token，最终表现为 API 可达但
+Android、bootstrap 和 AI 使用 canonical token 时持续收到 `401`。日常启动优先使用 APK bootstrap 或
+“启动运行中枢”固定脚本；上面的命令只用于明确的人工诊断和恢复。
 
 运行日志：
 
 ```text
 $HOME/.smallphoneai/logs/service-manager.log
 ```
+
+## 运行时 endpoint 快照
+
+service-manager 是运行地址的唯一发布者。它会把本轮已经通过 health 与进程/端口 ownership
+检查的入口原子写入：
+
+```text
+$HOME/.config/openhouseai/runtime/endpoints.json
+```
+
+Android、OpenHouse Web、SmallPhone 等消费者使用稳定的 `serviceId + endpointName` 查询该文件，
+不得读取内部 `ports.json`、猜测 preferred 端口或在快照缺失时自动回退 endpoint REST。
+快照 `state` 必须是 `ready` 且 `expiresAt` 尚未到期；条目缺失就表示当前入口不可消费。
+启动、停止、常驻、日志和详细失败原因仍按需使用 REST API。
+
+```bash
+ENDPOINTS_FILE="${OPENHOUSE_ENDPOINTS_FILE:-$HOME/.config/openhouseai/runtime/endpoints.json}"
+jq -e '.schemaVersion == 1 and .state == "ready"' "$ENDPOINTS_FILE"
+jq -r '.endpoints[] | [.serviceId, .name, .url] | @tsv' "$ENDPOINTS_FILE"
+```
+
+快照每 30 秒集中重验证，TTL 为 120 秒。service-manager 启动时先发布空的
+`initializing` 快照，完成重验证后才切换为 `ready`；停止或重新分配端口时会立即撤销旧条目。
 
 ## 状态检查
 
@@ -398,7 +435,7 @@ curl -q -fsS --max-time 5 -K /tmp/openhouse-sm-curl.cfg \
 
 ## 常驻设置与取消
 
-`service-manager 0.3.1` 把常驻意图保存在独立策略中：
+`service-manager 0.3.2` 把常驻意图保存在独立策略中：
 
 ```text
 <data_dir>/residency.json
@@ -447,8 +484,8 @@ OpenHouse Web 是独立的本地桌面与服务控制服务，不负责聊天。
 
 ```text
 服务 ID：openhouse-web
-页面：http://127.0.0.1:22110/
-健康检查：http://127.0.0.1:22110/health
+入口名：web
+首选端口：22110
 安装目录：$HOME/.local/lib/openhouse-web
 数据目录：$HOME/.local/share/openhouseai/openhouse-web
 启动器：$PREFIX/bin/openhouse-web
@@ -474,12 +511,13 @@ bash "$resource_dir/bootstrap/scripts/50-install-runtime-components.sh"
 ```bash
 test -f "$HOME/.local/lib/openhouse-web/src/server.mjs"
 test -x "$PREFIX/bin/openhouse-web"
-curl -fsS --max-time 5 http://127.0.0.1:22110/health
+OPENHOUSE_WEB_URL="$(jq -er '.endpoints[] | select(.serviceId == "openhouse-web" and .name == "web") | .url' "$HOME/.config/openhouseai/runtime/endpoints.json")"
+curl -fsS --max-time 5 "${OPENHOUSE_WEB_URL%/}/health"
 curl -q -fsS --max-time 5 -K /tmp/openhouse-sm-curl.cfg "$SM_URL/api/v1/services/openhouse-web/status"
 openhouse-system check service-control
 ```
 
-正式 ServiceSpec 使用 Termux native Node、固定服务 ID `openhouse-web`、端口 `22110`、HTTP health 和 `residentByDefault: true`。component 的 `entry` 指向 `22110`，`controlEntry.serviceRefs` 必须包含 `service-manager://services/openhouse-web`。
+正式 ServiceSpec 使用 Termux native Node、固定服务 ID `openhouse-web`、首选端口 `22110`、HTTP health 和 `residentByDefault: true`。消费者通过 `openhouse-web + web` 解析运行地址；component 的 `controlEntry.serviceRefs` 必须包含 `service-manager://services/openhouse-web`。
 
 首次启动会在数据目录以明文创建默认密码 `123456`；文件权限应为 `0600`，用户可在已登录页面修改。Android 通过一次性 bootstrap ticket 建立 Web 会话，浏览器不应获得 service-manager bearer token。
 
@@ -550,5 +588,5 @@ tail -n 160 "$HOME/.smallphoneai/logs/service-manager.log"
 - 不要绕过 service-manager 长期启动后台服务。
 - 不要在没有用户确认时停止全部服务。
 - 不要把 token 打印到聊天或日志。
-- 不要修改旧路径 `$HOME/.config/service-manager/config.json` 作为首选配置；优先使用 OpenHouse 专用路径。
+- OpenHouse 中禁止把旧路径 `$HOME/.config/service-manager/config.json` 用于 daemon 或 token；发现它时只识别并报告错误实例，不把它当作可用配置。
 - 不要在不知道服务 ID 的情况下猜测 stop/restart。
