@@ -21,7 +21,7 @@ OpenHouse 帮用户在手机上构建自己的 AI 工作环境。用户可以直
 | 路径和端口规范 | 避免 App、服务和调试端口互相冲突 | 新建或排障本地服务前确认路径、端口分段、已用端口和自定义 App 端口范围 | `PATHS_AND_PORTS.md` |
 | service-manager | 统一管理后台服务 | 启动、停止、修复、查日志和注册服务 | `SERVICE_MANAGER.md` |
 | CloudCLI / Claude Code | 后置编程工作台和网页入口 | 通过脚本安装，配置模型、测试连通、交给用户继续使用 | `AI_TOOL_POSTINSTALL.md`, `CLOUDCLI_CLAUDE_CODE.md` |
-| Codex | 后置命令行编程能力 | 通过脚本安装，在 Ubuntu 项目目录中执行开发任务 | `AI_TOOL_POSTINSTALL.md`, `MODEL_API_SETUP.md` |
+| Codex | 后置命令行编程能力 | 通过脚本安装，默认在 Termux native 项目目录执行；仅在明确不兼容时使用 Ubuntu | `AI_TOOL_POSTINSTALL.md`, `MODEL_API_SETUP.md` |
 | GitHub 本地配置助手 | 一次授权后让本机 AI 工具直接使用 GitHub | 复用 GitHub CLI 官方 OAuth 流程，配置 `gh` 登录和 `git` credential helper，不保存 token，不申请 OAuth App | `GITHUB_CONFIG_HELPER.md` |
 | Hermes Web | 可选高级工作台 | 在独立 uv 环境安装并注册服务 | `HERMES_SETUP.md` |
 | pi / pi-web | 首次配置助手和插件运行入口 | 读取文档、使用搜索插件、迁移配置 | `PI_AGENT_PLUGIN_SYSTEM.md` |

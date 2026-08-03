@@ -84,10 +84,10 @@ oh-termux-ensure-sshd ensure
 
 | 任务 | 默认终端 |
 | --- | --- |
-| 编程、构建、测试、用户项目 | Ubuntu |
+| 编程、构建、测试、用户项目 | Termux native；仅在明确不兼容时使用 Ubuntu |
 | pi-agent、pi-web | Termux native |
-| MCP、AI CLI | Ubuntu |
-| Claude Code、Codex、CloudCLI | Ubuntu |
+| MCP、AI CLI | Termux native；仅在明确不兼容时使用 Ubuntu |
+| Claude Code、Codex、CloudCLI | Termux native；仅在明确不兼容时使用 Ubuntu |
 | 安装 Ubuntu、修复 proot-distro | Termux |
 | Termux 包、Android 桥、底座修复 | Termux |
 | service-manager 长期服务 | 不直接开终端，优先 service-manager |
