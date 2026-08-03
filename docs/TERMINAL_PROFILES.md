@@ -6,7 +6,7 @@ OpenHouseAI 同时保留 Termux 终端和 Ubuntu 终端。它们不是同一种�
 
 ## 总规则
 
-1. 用户项目、开发命令、AI CLI 默认进入 Ubuntu。
+1. 用户项目和小 App 默认使用 Termux native；Ubuntu 仅作为依赖不兼容时的回退。
 2. Termux 负责 Android 宿主、Ubuntu 启停、底座修复和 Android 贴身能力。
 3. 不要把长期后台服务直接挂在任意终端里；长期服务应由 service-manager 管。
 4. 执行命令前先确认当前终端是哪一层。
@@ -62,7 +62,7 @@ proot-distro login ubuntu -- true
 
 ## Ubuntu 终端
 
-Ubuntu 运行在 Termux 的 proot-distro 内，是主要工作区。
+Ubuntu 运行在 Termux 的 proot-distro 内，是可选兼容工作区。
 
 Ubuntu 内的 home 通常是：
 

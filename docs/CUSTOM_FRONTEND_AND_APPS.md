@@ -1,5 +1,9 @@
 # 自定义前端和 App 编程指南
 
+创建或管理新的 OpenHouse 小 App 时，先读 `OPENHOUSE_SMALL_APP_GUIDE.md`。新指南以
+Termux native 为默认运行层，并用 WuxianPi Composite Package 统一描述服务和桌面入口。
+本文继续保留现有直接 registry 注册、完整 Web App 和自定义前端 shell 的详细示例。
+
 本文给用户、维护者和 AI agent 使用。目标是让 AI 可以真正写出一个可运行的自定义前端或 App，把它安装到首次 APK 确定的路径中，注册到 OpenHouse / SmallPhone 桌面，并交给 service-manager 管理长期进程。
 
 本文根据以下代码和文档整理：

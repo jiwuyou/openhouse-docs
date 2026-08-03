@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | Android App | 菜单、维护中心、WebView、终端入口 | 权限、状态、显式控制。 |
 | Termux 外层 | `/data/data/com.termux/files/home`, `/data/data/com.termux/files/usr` | 底座、bootstrap、Termux 包、proot-distro、Ubuntu 启停。 |
-| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/projects` | 主要工作区、AI CLI、开发工具和用户项目。 |
+| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/projects` | 可选兼容工作区；仅在 Termux/Bionic 明确不兼容时使用。 |
 
 Ubuntu rootfs 在 Termux 文件系统中的真实位置通常是：
 

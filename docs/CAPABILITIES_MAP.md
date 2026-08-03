@@ -17,7 +17,7 @@ OpenHouse 帮用户在手机上构建自己的 AI 工作环境。用户可以直
 | 工作台选择 | 不被锁定到单一 UI | 推荐 Claude Code、Codex、Hermes Web 或其它开源项目 | `WORKBENCH_OPTIONS.md` |
 | 自定义前端和 App | 让用户把自己的页面、工具或桌面壳接入 OpenHouse | 生成真实代码，注册到 component registry 和 service-manager，并负责后续更新 | `CUSTOM_FRONTEND_AND_APPS.md` |
 | Termux | Android 侧 Linux 底座和救援入口 | 修复 Ubuntu、调用 Android 侧桥接能力 | `TERMINAL_PROFILES.md`, `RECOVERY.md` |
-| Ubuntu in Termux | 主要开发环境 | 运行 Node/Python/uv/npm/git/pi，以及后置安装完成后的 Codex/Claude Code | `ENVIRONMENT.md` |
+| Ubuntu in Termux | 可选兼容环境 | 仅在 Termux/Bionic 无法稳定满足依赖时运行对应 Linux 工具 | `ENVIRONMENT.md` |
 | 路径和端口规范 | 避免 App、服务和调试端口互相冲突 | 新建或排障本地服务前确认路径、端口分段、已用端口和自定义 App 端口范围 | `PATHS_AND_PORTS.md` |
 | service-manager | 统一管理后台服务 | 启动、停止、修复、查日志和注册服务 | `SERVICE_MANAGER.md` |
 | CloudCLI / Claude Code | 后置编程工作台和网页入口 | 通过脚本安装，配置模型、测试连通、交给用户继续使用 | `AI_TOOL_POSTINSTALL.md`, `CLOUDCLI_CLAUDE_CODE.md` |

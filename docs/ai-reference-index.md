@@ -44,8 +44,8 @@
 | GitHub 本地授权和 gh 配置 | `GITHUB_CONFIG_HELPER.md`, `GITHUB_NETWORK_MIRRORS.md` | 复用 GitHub CLI 官方 OAuth 流程，不注册 OAuth App，配置 `gh auth login` 和 `gh auth setup-git`，让同一 Ubuntu 用户和同一 `$HOME` 下的 Codex / Claude Code 直接调用 `git` 和 `gh`。 |
 | service-manager | `SERVICE_MANAGER.md` | 注册、启动、停止、修复长期服务；daemon 与 token 命令只能显式使用 OpenHouse canonical config，禁止裸 `serve` / `token show`。 |
 | OpenHouse 系统检查 | `OPENHOUSE_SYSTEM.md`, `SERVICE_MANAGER.md` | 校验和渲染 subjects，按 subject 检查服务、HTTP、路径与技能，并正确解释 skipped/degraded。 |
-| 自定义前端或 App | `CUSTOM_FRONTEND_AND_APPS.md`, `PATHS_AND_PORTS.md`, `SERVICE_MANAGER.md` | 生成真实代码，先按规范选择路径和端口，再注册 component manifest 和 service-manager 服务，并按 AI 更新流程维护。 |
-| 首次配置后创建小型 Web App | `CUSTOM_FRONTEND_AND_APPS.md` | 作为双签完成后的可选任务创建手机优先的小型本地 Web App。 |
+| 创建或管理 OpenHouse 小 App | `OPENHOUSE_SMALL_APP_GUIDE.md` | 默认在 Termux native 创建和运行，用 Composite Package、service-manager 和 OpenHouse 桌面完成统一接入；仅在 Termux 明确不兼容时使用 Ubuntu/proot。 |
+| 现有直接注册或自定义前端 shell | `CUSTOM_FRONTEND_AND_APPS.md`, `PATHS_AND_PORTS.md`, `SERVICE_MANAGER.md` | 维护旧式直接注册流程、完整 Web App 示例或 SmallPhone 自定义 shell。 |
 | SmallPhone Front Beta 部署 | `SMALLPHONE_FRONT_BETA_DEPLOY.md`, `SERVICE_MANAGER.md`, `PATHS_AND_PORTS.md` | 第二阶段 Agent（默认 AionUI）从 APK 版本目录读取完整 `smallphone.tar`，通过 Termux service-manager + Ubuntu/proot 部署、注册、启动，并按 endpoint 快照验收 `smallphone-core/api` 与 `smallphone-frontend-beta/web`；禁止五文件增量复制和固定端口回退。 |
 | 前台保活 | `openhouse-runtime-policy.md` | 理解 Android 和 service-manager 的分工。 |
 | 停止运行栈 / 全部退出 | `openhouse-exit-all.md` | 明确停止范围、界面行为、保留范围和恢复行为。 |
@@ -57,8 +57,8 @@
 
 ## 默认决策规则
 
-- `pi-agent`、`pi-web` 默认在 Termux native 层作为长期服务执行；开发、项目命令、Claude Code、Codex、CloudCLI 默认在 Ubuntu 工作区执行。
-- Termux 外层只处理底座、proot-distro、Android 桥、安装引导和救援。
+- 新建小 App 默认在 Termux native 开发和运行；Ubuntu/proot 仅作为 Termux 明确不兼容时的兼容回退。
+- `pi-agent`、`pi-web` 和 service-manager 默认在 Termux native 层作为长期服务执行。
 - Termux 到 Ubuntu 使用 `oh-ubuntu-root` / `proot-distro`；Ubuntu 到 Termux 使用 `openhouse-termux`，不要在 Ubuntu 内直接执行 Termux prefix 二进制。
 - 后台长期服务必须优先通过 service-manager 管理。
 - 新增本地长期 App 前必须先按 `PATHS_AND_PORTS.md` 选择未占用端口，不要占用控制平面、桥接或 SmallPhone 平台端口。

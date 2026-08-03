@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "io.openhouse.small-app-guide",
+  "name": "OpenHouse 小 App 开发与统一接入指南",
+  "version": "1.0.0",
+  "summary": "帮助助手在 Termux 中创建小 App，并接入 WuxianPi、service-manager 和 OpenHouse 桌面。",
+  "description": "安装后只向助手提供一句读取指引；完整指南通过 Skill 按任务需要读取。",
+  "license": "CC-BY-4.0",
+  "homepage": "https://github.com/jiwuyou/openhouse-docs",
+  "categories": ["skill", "knowledge-experience"],
+  "requires": {
+    "hostCapabilities": [
+      { "id": "wuxianpi.package", "contractVersion": 1 },
+      { "id": "pi.skill", "contractVersion": 1 },
+      { "id": "wuxianpi.context", "contractVersion": 1 }
+    ],
+    "packages": []
+  },
+  "build": { "mode": "none" },
+  "artifacts": [],
+  "contributions": [
+    {
+      "id": "io.openhouse.small-app-guide/context.hint",
+      "type": "wuxianpi.context",
+      "name": "OpenHouse 小 App 指引",
+      "description": "仅提示助手在相关任务中读取完整指南。",
+      "path": "market/wuxianpi/context/instruction.md",
+      "format": "markdown",
+      "assistantSelectable": false
+    },
+    {
+      "id": "io.openhouse.small-app-guide/skill.guide",
+      "type": "pi.skill",
+      "name": "OpenHouse 小 App 开发与统一接入",
+      "description": "按需读取并执行 OpenHouse 小 App 的创建、服务注册、桌面接入和验证流程。",
+      "path": "market/wuxianpi/skills/openhouse-small-app-guide",
+      "assistantSelectable": false
+    }
+  ]
+}

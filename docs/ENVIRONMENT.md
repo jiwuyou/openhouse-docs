@@ -6,7 +6,7 @@ OpenHouseAI 运行在 Android 手机上，结构如下：
 - Termux 提供终端环境和包管理。
 - Ubuntu 通过 `proot-distro` 安装在 Termux 内。
 - Termux native 层安装 Node.js 24 LTS、service-manager、pi-agent、pi-web 和基础桥接服务。
-- Ubuntu 通过 `proot-distro` 提供主要 Linux 工作区；Codex CLI、Claude Code、ClaudeCodeUI / CloudCLI 和 Hermes 由 pi-agent 后置引导安装到合适的 Linux 工作区。
+- Ubuntu 通过 `proot-distro` 提供可选 Linux 兼容工作区；Codex CLI、Claude Code、ClaudeCodeUI / CloudCLI 和 Hermes 由 pi-agent 后置引导安装到实际兼容的工作区。
 - pi 和 pi-web 默认安装在 Termux native 层，作为长期服务由 service-manager 管理。
 - 安装完成后，service-manager 负责管理 openhouse-connect、`pi-agent`、`pi-web` 和核心后台服务。
 
@@ -61,7 +61,7 @@ OpenHouse 的路径必须按层理解。`/root` 是 Ubuntu 内的 root home，�
 
 ### Ubuntu 内看到的路径
 
-这些路径在 `proot-distro login ubuntu` 后可见，是 OpenHouse 的主要工作区：
+这些路径在 `proot-distro login ubuntu` 后可见，属于 OpenHouse 的可选兼容工作区：
 
 | 路径 | 用途 |
 | --- | --- |
@@ -92,7 +92,7 @@ OpenHouse 的路径必须按层理解。`/root` 是 Ubuntu 内的 root home，�
 | `/data/data/com.termux/files/home/openhouseai-docs/official` | 官方文档的运行期物理目录。Ubuntu 内的 `/root/openhouse/docs` 和兼容文档路径应指向这里。 |
 | `/data/data/com.termux/files/home/openhouseai-docs/agent-notes` | AI 或维护任务可写的运行期笔记目录，不属于官方文档事实源。 |
 
-Termux 外层用于修底座、修 Ubuntu、查安装日志、调用 Android 贴身能力。不要把用户项目构建、Codex、Claude Code 或长期服务默认放在 Termux 外层执行。
+Termux native 是小 App 的默认开发和运行层，也用于修底座、修 Ubuntu、查安装日志和调用 Android 贴身能力。长期服务必须交给 service-manager；只有依赖明确不兼容时才把项目放进 Ubuntu/proot。
 
 公开文档的长期事实源是 `https://github.com/jiwuyou/openhouse-docs` 的 `docs/`。APK 内的 `openhouse/docs-public` 是打包快照；设备运行期默认把快照或公开仓库内容同步到 Termux native 的 `openhouseai-docs/official`，再通过软链接暴露给 Ubuntu 内的 `/root/openhouse/docs`、`/root/openhouseai-docs/official` 和旧路径。
 

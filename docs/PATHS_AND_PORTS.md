@@ -13,7 +13,7 @@ OpenHouse 同时存在三层路径。AI 执行命令前必须先判断当前层�
 | Android App / Termux 外层 | `/data/data/com.termux/files/home` | Android 侧 Termux home、bootstrap、proot-distro、救援脚本和 APK assets 解包入口。 |
 | Termux prefix | `/data/data/com.termux/files/usr` | Termux 包、proot-distro rootfs、Android 侧可执行文件。 |
 | Termux native | `/data/data/com.termux/files/home` | service-manager、pi-agent、pi-web 和 Android-adjacent host control 默认在这里运行。 |
-| Ubuntu in Termux | `/root` | 默认开发工作区；SmallPhone、Codex、Claude Code、CloudCLI、AionUi 和用户项目默认在这里运行。 |
+| Ubuntu in Termux | `/root` | 可选兼容工作区；仅在 Termux/Bionic 无法稳定满足依赖时用于小 App。 |
 | Ubuntu rootfs 真实位置 | `/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu` | Termux 内保存 Ubuntu rootfs 的物理目录；排障时可识别，不要直接改 rootfs 内部文件。 |
 | Ubuntu 镜像策略 helper | 最新 `/data/data/com.termux/files/home/.local/share/openhouseai/update-resources/apk-*/bootstrap/scripts/_ubuntu-mirror-policy.sh` | rootfs 与 apt 的 canonical 有序故障转移、错误分类和本次运行 lock；使用时先选择最新资源目录。 |
 | Ubuntu canonical apt source | `/etc/apt/sources.list.d/openhouseai-ubuntu.sources` | Ubuntu 内唯一由 OpenHouse 管理的 base source 文件；第三方 PPA 保持独立。 |

@@ -82,10 +82,10 @@ OpenHouse 同时有 Android App、Termux 外层和 Ubuntu in Termux。看到路�
 
 | 层级 | 常见路径 | 说明 |
 | --- | --- | --- |
-| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/openhouseai-docs/official`, `/root/projects` | 主要工作区。用户项目、大多数开发命令，以及后置安装完成后的 Claude Code、Codex、CloudCLI 默认在这里运行。pi-agent/pi-web 默认在 Termux native 层运行。 |
+| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/openhouseai-docs/official`, `/root/projects` | 可选兼容工作区。小 App 默认在 Termux native 创建和运行；仅在 Termux/Bionic 明确不兼容时进入 Ubuntu。 |
 | Termux 文件系统 | `/data/data/com.termux/files/home`, `/data/data/com.termux/files/usr` | Android 侧 Termux shell 的真实 home 和 prefix。用于 bootstrap、Termux 包、proot-distro、Ubuntu 启停和底座修复。 |
 | Ubuntu rootfs 真实位置 | `/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu` | Termux 文件系统中保存 Ubuntu 根文件系统的位置。排障时可知道数据在哪里，但不要直接改 rootfs 内部文件，优先通过 `proot-distro login ubuntu` 进入 Ubuntu。 |
-| Android App 入口 | OpenHouse 桌面、菜单总览 App、终端 App 中的 Termux 或 Ubuntu 终端入口 | 具体入口名称以当前 App 为准。Termux 终端是 Android 侧底座终端；Ubuntu 终端是主要开发工作区。 |
+| Android App 入口 | OpenHouse 桌面、菜单总览 App、终端 App 中的 Termux 或 Ubuntu 终端入口 | 具体入口名称以当前 App 为准。Termux native 是默认工作区；Ubuntu 终端是按需兼容入口。 |
 
 `Termux 终端` 不是 `/root`。它是 Android App 沙箱内的 Termux shell，通常对应 `/data/data/com.termux/files/home`。安装完成后打开终端可能会自动进入 Ubuntu，所以排障时必须先识别当前层，再执行命令。
 
@@ -100,6 +100,7 @@ OpenHouse 同时有 Android App、Termux 外层和 Ubuntu in Termux。看到路�
 - `WORKBENCH_OPTIONS.md`：主工作台选择说明。Claude Code、Codex、Hermes Web 或其它开源项目都可以成为用户自己的工作台。
 - `OPENHOUSE_DESKTOP.md`：原生桌面、默认入口策略、菜单总览 App、横向分页稀疏槽位、跨屏拖动、编辑模式、改名/改图标、App 顶部栏、可拖动悬浮球和桌面 App 类型。
 - `CUSTOM_FRONTEND_AND_APPS.md`：自定义前端 shell 和自定义 Web App 编程指南，包含可运行代码、service-manager 服务定义、组件 manifest 和 AI 更新流程。
+- `OPENHOUSE_SMALL_APP_GUIDE.md`：助手创建和管理小 App 的主入口；Termux native 默认，Ubuntu/proot 仅兼容回退，并使用 WuxianPi Package、service-manager 和 OpenHouse 桌面统一接入。
 - `START_HERE.md`：首次阅读入口。
 
 ### 2. 运行环境和配置
@@ -150,6 +151,7 @@ App 工程架构设计文档位于 `openhouseai-app/docs/`，主要入口是 `AR
 - `permissions.md`：后台、通知、存储、Shizuku、无障碍等权限和降级行为。
 - `failure-boundaries.md`：自动修复、需用户确认、建议重置或重装的边界。
 - `CUSTOM_FRONTEND_AND_APPS.md`：给 AI 和开发者的自定义前端/App 实作手册，说明如何把真实代码注册到桌面和 service-manager。
+- `OPENHOUSE_SMALL_APP_GUIDE.md`：创建或管理 OpenHouse 小 App 时优先读取的统一接入指南。
 - `BROWSER_AND_WEBVIEW.md`：内置浏览器、本地页面、WebView 页壳、窗口保留策略、受控浏览器命令和调试建议。
 - `ANDROID_CONTROL_SHIZUKU.md`：Shizuku 可选授权后的 Android 侧增强能力和边界。
 - `FILE_TRANSFER_STAGING.md`：文件中转站、共享路径和让 AI 处理文件的方式。

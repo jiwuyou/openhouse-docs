@@ -11,18 +11,18 @@ OpenHouseAI 是人和 AI 共用的软件平台。用户通过界面使用能力�
 | 层级 | 角色 | AI 默认用途 |
 | --- | --- | --- |
 | Android App | 入口、权限、状态、显式开关 | 观察状态，请求用户确认，进入维护/控制页面 |
-| Termux | Android 宿主、底座、救援层 | 修复 Termux/Ubuntu，调用 Android 桥，检查安装链路 |
-| Termux native | 本机控制层和长期入口 | service-manager、pi-agent、pi-web |
-| Ubuntu in Termux | 核心 Linux 工作区 | 开发、后置 AI 工具、MCP、项目命令 |
+| Termux | Android 宿主、默认工作区和救援层 | 小 App 开发、Termux 包、Android 桥和安装链路 |
+| Termux native | 本机控制层和长期入口 | service-manager、pi-agent、pi-web 和默认小 App 服务 |
+| Ubuntu in Termux | 可选 Linux 兼容工作区 | 仅处理 Termux/Bionic 明确不兼容的依赖 |
 | service-manager | 安装完成后的控制平面 | 管理后台服务的启动、停止、状态、日志和修复 |
 | pi-agent / pi-web | 首次配置助手和背后的本地页面运行时 | 读取文档、迁移模型配置、调用插件、帮助用户理解系统 |
 
-正式控制面：service-manager daemon 在 Termux native 层运行。`pi-agent` 和 `pi-web` 默认也在 Termux native 层作为长期服务托管；Ubuntu/proot 主要是开发、AI CLI 和后置工作台层。需要管理 Ubuntu 内长期服务时，仍应由 Termux native service-manager 通过 `proot-distro` provider 管理。
+正式控制面：service-manager daemon 在 Termux native 层运行。`pi-agent`、`pi-web` 和普通小 App 默认也在 Termux native 层作为长期服务托管。Ubuntu/proot 是可选兼容层；需要管理 Ubuntu 内长期服务时，仍应由 Termux native service-manager 通过 `proot-distro` provider 管理。
 
 ## 强制规则
 
-1. 开发、AI CLI、项目构建、Node/Python/Rust 工具链默认使用 Ubuntu 终端。
-2. Termux 终端只用于底座、Android 桥、Ubuntu 启停、安装引导和救援。
+1. 创建和运行小 App 默认使用 Termux native；只有确认依赖无法在 Termux/Bionic 稳定工作时才使用 Ubuntu/proot。
+2. 使用 Ubuntu 兼容层时记录具体原因；不能仅因项目是 Linux/Node/Python 项目就默认进入 Ubuntu。
 3. 后台服务必须优先通过 service-manager 管理，不要绕过它直接长期 `nohup` 或后台启动。
 4. 后台能力必须可显式关闭。用户要求关闭时，要停止相关 service-manager 服务和 agent 子进程。
 5. 不要默认清除 App 数据。
@@ -35,6 +35,8 @@ OpenHouseAI 是人和 AI 共用的软件平台。用户通过界面使用能力�
 注册新后台能力时，先写 service-manager `ServiceSpec`，再写 OpenHouseAI `components.d/*.json`
 侧边栏入口。组件注册只允许描述 UI 入口和 service-manager 引用，不能包含 `command`、
 `shell`、`script` 或 `args`。
+
+创建或管理小 App 时先读 `OPENHOUSE_SMALL_APP_GUIDE.md`。
 
 OpenHouse 的“首页”应理解为默认入口策略，可设为桌面、某个桌面 App 或上次退出页。桌面替代默认菜单心智；旧首页/菜单功能保留为桌面里的“菜单总览”App。不要为了桌面化删除菜单总览，也不要把它和桌面路由写成同一个页面。
 
