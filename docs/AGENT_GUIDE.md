@@ -4,16 +4,20 @@
 
 ## 环境定义
 
-你运行在 Termux 之上的 Ubuntu 中。
+你运行在 OpenHouse 的 Termux 环境中，当前 shell 可能是 Termux native，也可能是可选的
+Ubuntu/proot 兼容层。不要预先假设自己在 Ubuntu；先检查 `$HOME`、`$PREFIX` 和
+`/etc/os-release`。
 
 可以把它理解为：
 
 - Android
-- Termux
-- Ubuntu（由 `proot-distro` 提供）
-- OpenCode 或其他 agent 在 Ubuntu 内运行
+- Termux native（默认工作区和运行层）
+- Ubuntu（由 `proot-distro` 提供，仅作兼容回退）
+- agent 在当前实际兼容的工作区运行
 
-所以，你虽然身处 Ubuntu，但很多实际文件会位于 Termux 主目录下。
+小 App、普通开发任务和长期服务默认使用 Termux native。只有确认依赖无法在
+Termux/Bionic 稳定运行时，才进入 Ubuntu；长期服务仍由 Termux native 的
+service-manager 管理。
 
 ## 你的目标
 
@@ -30,7 +34,7 @@
 - 官方文档目录：`/data/data/com.termux/files/home/product-docs/official`
 - Agent 笔记目录：`/data/data/com.termux/files/home/product-docs/agent-notes`
 
-如果 Ubuntu 中另外提供了更短的入口路径，例如：
+如果当前确实在 Ubuntu 中，并另外提供了更短的入口路径，例如：
 
 - `~/product-docs/official`
 - `~/product-docs/agent-notes`
@@ -61,4 +65,4 @@
 
 ## 一句话结论
 
-你运行在基于 Termux 的 Ubuntu 中，优先读取 `product-docs` 下的官方文档，不要把整个 Termux 当作自由工作区。
+你运行在 OpenHouse 的 Termux 环境中，Termux native 是默认工作区，Ubuntu 仅作明确不兼容时的回退。优先读取 `product-docs` 下的官方文档，不要扫描无关用户目录。

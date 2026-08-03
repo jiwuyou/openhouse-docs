@@ -47,7 +47,8 @@ Claude Code 的后置检查必须同时满足两点：
 
 ## 运行层要求
 
-默认在 Ubuntu 内执行。若当前在 Termux 外层，可以使用：
+默认先在 Termux native 检查和安装可兼容版本。只有目标工具或现有后置脚本明确依赖
+Ubuntu 时，才从 Termux 使用：
 
 ```bash
 proot-distro login ubuntu -- bash -lc '/root/openhouse/scripts/check-ai-tools.sh'

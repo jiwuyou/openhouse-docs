@@ -26,7 +26,7 @@ OpenHouse 不把任何单一界面规定为用户必须长期使用的主工作�
 | 工作台 | 适合场景 | 注意事项 |
 | --- | --- | --- |
 | Claude Code / CloudCLI | 编程、项目修改、长任务协作、网页操作 | 需要模型配置正确，建议完成连通测试后使用 |
-| Codex | 命令行编程、项目构建、测试和代码修改 | 默认在 Ubuntu 项目目录运行 |
+| Codex | 命令行编程、项目构建、测试和代码修改 | 默认在 Termux native 项目目录运行；不兼容时才进入 Ubuntu |
 | Hermes Web | 可选高级 Web 工作台 | 不进入 APK 核心 payload，安装耗时较久，应使用独立 uv 环境 |
 | pi-agent | 首次配置、文档检索、模型迁移、系统理解 | 不应被写成唯一主工作台 |
 | 其它开源项目 | 写作、知识库、项目管理、自动化、个人系统 | 需要 AI 搜索、评估、安装、注册服务和侧边栏入口 |
@@ -49,8 +49,8 @@ AI 应该先问清楚需求，再检索和比较可行项目，然后说明安�
 1. 问清用户目标、数据类型、使用频率、离线需求、隐私要求和手机性能限制。
 2. 联网检索候选开源项目，优先看官方 README、文档、release、issue 和活跃度。
 3. 确认运行方式：Node、Python、uv、Docker 替代方案、静态站点或单二进制。
-4. 判断是否适合 Android + Termux + Ubuntu 环境。
-5. 在 Ubuntu 中安装到独立目录，避免污染 OpenHouse 核心环境。
+4. 先判断是否适合 Android + Termux native；只有明确不兼容时再评估 Ubuntu/proot。
+5. 在选定工作区的独立目录安装，默认使用 Termux native，避免污染 OpenHouse 核心环境。
 6. 写 service-manager 服务定义。
 7. 写 OpenHouse 侧边栏组件注册。
 8. 启动并测试本地端口。

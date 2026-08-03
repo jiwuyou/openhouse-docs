@@ -28,7 +28,7 @@ APK 内的 `openhouse/docs-public` 是这个公开仓库的快照。只更新文
 ~/openhouseai-docs/official
 ```
 
-Termux native AI 优先读取 `/data/data/com.termux/files/home/openhouse/docs`，Ubuntu 工作台优先读取 `/root/openhouse/docs`。两者指向同一份文档。AI 自己产生的笔记不要写进官方文档目录，使用 `openhouseai-docs/agent-notes`。
+Termux native AI 优先读取 `/data/data/com.termux/files/home/openhouse/docs`；只有当前确实在 Ubuntu 兼容层时才读取 `/root/openhouse/docs`。两者指向同一份文档。AI 自己产生的笔记不要写进官方文档目录，使用 `openhouseai-docs/agent-notes`。
 
 安装完成后，官方文档目录统一为：
 

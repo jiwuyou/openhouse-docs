@@ -13,7 +13,7 @@ OpenHouseAI 是一个装在手机里的人机协作平台。它不是单纯的�
 ~/openhouseai-docs/official
 ```
 
-Termux native pi-web 默认引用 `/data/data/com.termux/files/home/openhouse/docs`；Ubuntu 工作台使用 `/root/openhouse/docs`。它们指向同一份文档，`/root/openhouseai-docs/official` 是兼容旧路径。
+Termux native pi-web 默认引用 `/data/data/com.termux/files/home/openhouse/docs`；只有当前在 Ubuntu 兼容层时才使用 `/root/openhouse/docs`。它们指向同一份文档，`/root/openhouseai-docs/official` 是兼容旧路径。
 
 ## 首次配置一键入口
 

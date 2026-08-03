@@ -94,8 +94,8 @@ search
 
 | 层 | 典型路径 | 用途 |
 | --- | --- | --- |
-| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/openhouseai-docs/official`, `/root/projects` | 开发、用户项目，以及后置安装完成后的 AI CLI、CloudCLI、Claude Code。pi-agent/pi-web 默认在 Termux native 层运行。 |
-| Termux 外层 | `/data/data/com.termux/files/home`, `/data/data/com.termux/files/usr` | bootstrap、Termux 包、proot-distro、Ubuntu 启停、底座修复。 |
+| Ubuntu 内 | `/root`, `/root/openhouse/docs`, `/root/openhouseai-docs/official`, `/root/projects` | 可选兼容工作区；仅在 Termux/Bionic 明确不兼容时使用。 |
+| Termux native | `/data/data/com.termux/files/home`, `/data/data/com.termux/files/usr` | 默认开发与运行、service-manager、Termux 包、Android 桥和底座修复。 |
 | Ubuntu rootfs 真实路径 | `/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu` | Ubuntu 数据在 Termux 文件系统中的位置；排障时识别，不要默认直接修改。 |
 
 OpenHouse 桌面、菜单总览 App 或终端 App 中可进入 Termux 或 Ubuntu 终端，具体入口名称以当前 App 为准。Termux 终端不是 `/root`，它是 Android 侧 Termux shell；安装完成后可能自动进入 Ubuntu，所以必须用命令确认当前层。
@@ -201,7 +201,8 @@ oh-termux-ensure-sshd ensure
 
 ### 决策规则
 
-- 开发、构建、测试、用户项目、Codex、Claude Code、CloudCLI：优先 Ubuntu。
+- 开发、构建、测试、用户项目和可在 Termux 运行的 AI CLI：优先 Termux native。
+- 只有确认依赖在 Termux/Bionic 下无法稳定工作时，才进入 Ubuntu/proot，并记录具体原因。
 - pi-agent、pi-web：优先 Termux native，由 service-manager 管理。
 - service-manager 管理的长期服务：优先 service-manager。
 - proot-distro、Termux 包、Android 权限、安装日志、底座修复：优先 Termux 外层。
@@ -213,10 +214,10 @@ oh-termux-ensure-sshd ensure
 
 | 任务 | 默认终端 | 原因 |
 | --- | --- | --- |
-| 编程、构建、测试、运行项目 | Ubuntu | 工具链和用户项目在 Ubuntu 内 |
-| Codex CLI、Claude Code、CloudCLI | Ubuntu | AI CLI 默认安装在 Ubuntu 内 |
+| 编程、构建、测试、运行项目 | Termux native | 默认工作区；可直接使用 Termux 工具链和 Android 贴身能力 |
+| Codex CLI、Claude Code、CloudCLI | Termux native | 优先使用 Termux 可用版本；只有依赖不兼容时进入 Ubuntu |
 | pi、pi-web | Termux native | 应由 service-manager 管理为长期服务 |
-| MCP server、agent server | Ubuntu | 应由 service-manager 管理为长期服务 |
+| MCP server、agent server | Termux native | 应由 service-manager 管理为长期服务；不兼容时才用 `proot-distro` provider |
 | 检查 proot-distro、安装 Ubuntu | Termux | Ubuntu 不存在或不可用时仍需要修复入口 |
 | Android intent、App 私有目录、wake lock、权限桥 | Termux / Android App | 这些能力贴近 Android 沙箱 |
 | 修复 Termux prefix | Termux / Android App | 这是 Ubuntu 的下层底座 |
@@ -289,7 +290,7 @@ proot-distro login ubuntu -- true
 3. 下载并安装 Ubuntu rootfs。
 4. 同步 OpenHouseAI 文档。
 5. 安装 Ubuntu 基础包。
-6. 设置打开 Termux 后默认进入 Ubuntu。
+6. 提供 Ubuntu 兼容入口，但保持 Termux native 为默认工作区。
 7. 安装 Node.js 24 LTS。
 8. 同步 `/root/openhouse/docs` 和 `/root/openhouse/scripts`。
 9. 解包 pi-agent / pi-web。
@@ -331,7 +332,7 @@ pi-agent 的新手提示词必须能直接引用安装后的稳定文档路径�
 - 选择主工作台：读 `/root/openhouse/docs/WORKBENCH_OPTIONS.md`、`/root/openhouse/docs/SERVICE_MANAGER.md`、`/root/openhouse/docs/BROWSER_AND_WEBVIEW.md`。
 - 熟悉 OpenHouse 整个系统：读 `/root/openhouse/docs/OPENHOUSE_SYSTEM.md`、`/root/openhouse/docs/SERVICE_MANAGER.md`、`/root/openhouse/docs/RECOVERY.md`、`/root/openhouse/docs/AI_AGENT_REFERENCE.md`。
 
-默认项目目录建议是 `/root`。这是 Ubuntu root 用户目录，不是 Android 系统根目录。执行文件修改前，应先确认目标路径和用户意图。
+默认项目目录建议放在当前 Termux home 下，例如 `$HOME/projects`。如果项目因明确兼容问题运行在 Ubuntu，才使用 `/root/projects`。执行文件修改前，应先确认当前层、目标路径和用户意图。
 
 默认工具策略是全部开启。只有用户明确要求低风险、只读或关闭工具时，才切换到受限工具模式。
 

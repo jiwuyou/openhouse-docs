@@ -477,7 +477,8 @@ admin
 
 ## 配置检查
 
-重新打开 Termux 后会默认进入 Ubuntu。进入后检查：
+在当前工具实际安装的工作区检查；默认先在 Termux native 执行。如果旧环境被配置为
+自动进入 Ubuntu，先确认当前层再运行：
 
 ```bash
 command -v codex

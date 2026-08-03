@@ -16,7 +16,8 @@ Ubuntu rootfs 在 Termux 文件系统中的真实位置通常是：
 /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu
 ```
 
-知道这个路径有助于排障，但不要默认直接修改 rootfs 内部文件。优先通过 Ubuntu 终端或 `proot-distro login ubuntu` 操作。
+知道这个路径有助于排障，但不要默认直接修改 rootfs 内部文件。只有任务确实需要 Ubuntu
+时，才通过 Ubuntu 终端或 `proot-distro login ubuntu` 操作。
 
 ## 判断当前在哪
 

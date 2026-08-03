@@ -10,7 +10,7 @@ OpenHouseAI 同时保留 Termux 终端和 Ubuntu 终端。它们不是同一种�
 2. Termux 负责 Android 宿主、Ubuntu 启停、底座修复和 Android 贴身能力。
 3. 不要把长期后台服务直接挂在任意终端里；长期服务应由 service-manager 管。
 4. 执行命令前先确认当前终端是哪一层。
-5. 如果 Ubuntu 不可用，不要在 Termux 里硬跑 Ubuntu 侧开发任务；先修 Ubuntu。
+5. Ubuntu 不可用时继续使用 Termux native；只有任务已确认依赖 Ubuntu 时才修复或进入 Ubuntu。
 
 ## Termux 终端
 
@@ -142,8 +142,8 @@ proot-distro login ubuntu -- bash -lc 'curl -fsS --max-time 2 http://127.0.0.1:2
 
 - 已经在 Ubuntu 时，不要嵌套调用 `proot-distro login ubuntu -- ...`。
 - 单次检查可以从 Termux 调 Ubuntu。
-- 高频命令、长任务、开发服务应在 Ubuntu 内或通过 service-manager 常驻执行。
-- 如果 `proot-distro login ubuntu -- true` 失败，先修 Ubuntu，不要继续跑开发命令。
+- 高频命令和开发任务默认在 Termux native 执行；长期服务通过 service-manager 常驻。
+- 只有依赖已确认与 Termux/Bionic 不兼容时才进入 Ubuntu；此时若 `proot-distro login ubuntu -- true` 失败，再先修 Ubuntu。
 
 ### Ubuntu -> Termux
 

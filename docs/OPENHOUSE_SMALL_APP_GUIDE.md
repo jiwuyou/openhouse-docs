@@ -160,7 +160,7 @@ my-small-app/
     "health": [
       {
         "type": "http",
-        "url": "http://127.0.0.1:23130/health",
+        "url": "http://127.0.0.1:{{port:web}}/health",
         "interval": "30s",
         "timeout": "5s"
       }

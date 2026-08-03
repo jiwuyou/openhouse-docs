@@ -37,7 +37,7 @@ Codex CLI、Claude Code、ClaudeCodeUI / CloudCLI 和 Hermes 是后置能力，�
 5. 先启动 `openhouse-web`、`pi-agent` 和 `pi-web`，让用户尽早看到系统入口和首次配置入口。
 6. 按 canonical 有序故障转移策略解析并锁定 Ubuntu rootfs 来源，然后安装 Ubuntu rootfs，同时注入 Ubuntu 侧环境探测和 `openhouse-termux` 桥接 CLI。
 7. 安装 Ubuntu 基础包，包括 `openssh-client`、`jq`、`git`、`gh`、`ripgrep` 等。
-8. 设置打开 Termux 后默认进入 Ubuntu。
+8. 提供可选 Ubuntu 兼容入口，不把 Ubuntu 设为小 App 的默认工作区。
 9. 安装 Ubuntu Node.js 24 LTS。
 10. 同步 OpenHouse 文档和后置脚本入口。
 11. 安装 openhouse-connect、SmallPhone 兼容服务和 GitHub 配置助手。
@@ -45,7 +45,7 @@ Codex CLI、Claude Code、ClaudeCodeUI / CloudCLI 和 Hermes 是后置能力，�
 13. 启动 OpenHouse 基础运行栈。
 14. 记录最终健康检查。
 
-默认进入 Ubuntu 必须在后置 AI 工具安装之前完成。
+后置 AI 工具优先安装到 Termux native；只有工具明确不兼容时，才先准备 Ubuntu 兼容层。
 
 pi-web 首装使用 APK 内置完整 runtime，只做解压、校验、注册和启动，不通过 `npm install -g` 安装 pi-web tgz。Node.js、Ubuntu 基础包和其它缺失依赖阶段仍可能需要网络。Codex CLI、Claude Code、ClaudeCodeUI / CloudCLI 和 Hermes 的网络安装放到 pi-agent 后置引导阶段。
 
@@ -65,7 +65,7 @@ OpenHouse 的路径必须按层理解。`/root` 是 Ubuntu 内的 root home，�
 
 | 路径 | 用途 |
 | --- | --- |
-| `/root` | Ubuntu root 用户主目录，pi-web 新项目默认建议目录。 |
+| `/root` | Ubuntu root 用户主目录，仅供需要 Ubuntu 兼容层的项目使用。 |
 | `/root/openhouse/docs` | 推荐官方文档目录，给用户和 AI 使用。 |
 | `/root/openhouse/scripts` | 后置 AI 工具安装和检查入口。 |
 | `/root/openhouseai-docs/official` | 兼容旧路径的官方文档目录。 |
@@ -104,7 +104,8 @@ Ubuntu 通过 `proot-distro` 安装在 Termux prefix 下，常见真实路径是
 /data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu
 ```
 
-这个路径说明 Ubuntu 数据在 Termux 文件系统中的物理位置。普通操作和 AI 任务应优先通过以下方式进入 Ubuntu：
+这个路径说明 Ubuntu 数据在 Termux 文件系统中的物理位置。只有任务已确认需要 Ubuntu
+兼容层时，才通过以下方式进入：
 
 ```bash
 proot-distro login ubuntu
