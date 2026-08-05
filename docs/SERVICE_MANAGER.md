@@ -223,6 +223,76 @@ openhouse-system check pi-agent
 
 再回到 OpenHouseAI 桌面/主菜单，或重新打开页面触发刷新。
 
+### WuxianPi 首次安装的桌面注册
+
+`yuanshengwuxianpi` 服务注册和 OpenHouse 桌面组件注册是两条独立链路。服务已经存在或正在运行，不会自动创建桌面图标；桌面、菜单总览 App 和侧边栏只读取 `components.d/*.json`。因此 WuxianPi 首装必须在确认服务存在后，再单独注册 `pi-agent` 组件。
+
+WuxianPi 首装插件使用固定组件 ID 和本地 Web 地址：
+
+```text
+组件 ID：pi-agent
+服务 ID：yuanshengwuxianpi
+入口：http://127.0.0.1:20765/
+文件：$HOME/.config/openhouseai/components.d/pi-agent.json
+```
+
+当前 service-manager 没有发布 20765 的 endpoint 快照，清单不填写 `serviceRefs`，服务启停仍使用 OpenHouse 内置的服务控制入口。清单保留四层结构，即使 `serviceManager` 暂时为空对象：
+
+```json
+{
+  "schemaVersion": 1,
+  "id": "pi-agent",
+  "title": "WuxianPi AI",
+  "description": "WuxianPi 本地救援 AI",
+  "kind": "app",
+  "enabled": true,
+  "shellMenu": {
+    "visible": true,
+    "section": "ai",
+    "order": 80,
+    "title": "WuxianPi AI",
+    "subtitle": "本地救援 AI",
+    "entry": { "type": "webview", "url": "http://127.0.0.1:20765/" },
+    "desktop": { "visible": true, "pinned": true, "order": 80, "icon": "brain" }
+  },
+  "smallphoneApp": {
+    "visible": true,
+    "section": "ai",
+    "order": 80,
+    "icon": "brain",
+    "entry": { "type": "webview", "url": "http://127.0.0.1:20765/" }
+  },
+  "serviceManager": {},
+  "ai": { "visible": true, "summary": "WuxianPi 本地救援 AI Web UI，运行于 yuanshengwuxianpi。" }
+}
+```
+
+注册脚本应使用 canonical 配置和 token，先确认服务，再幂等调用 registry API：
+
+```bash
+curl -q -fsS --max-time 10 -K /tmp/openhouse-sm-curl.cfg \
+  "$SM_URL/api/v1/services/yuanshengwuxianpi"
+curl -q -fsS --max-time 10 -K /tmp/openhouse-sm-curl.cfg \
+  -X PUT -H 'Content-Type: application/json' \
+  --data-binary @"$HOME/.config/openhouseai/components.d/pi-agent.json" \
+  "$SM_URL/api/v1/registry/components/pi-agent"
+curl -q -fsS --max-time 10 -K /tmp/openhouse-sm-curl.cfg \
+  -X POST "$SM_URL/api/v1/registry/sync"
+```
+
+验证文件和 API：
+
+```bash
+jq -e '.id == "pi-agent" and .shellMenu.desktop.visible == true' \
+  "$HOME/.config/openhouseai/components.d/pi-agent.json"
+curl -q -fsS --max-time 5 -K /tmp/openhouse-sm-curl.cfg \
+  "$SM_URL/api/v1/registry/components" | grep -q '"id"[[:space:]]*:[[:space:]]*"pi-agent"'
+openhouse-system validate
+openhouse-system check pi-agent
+```
+
+重复执行只更新 `pi-agent`，不得删除其它 `components.d` 文件，也不得删除或重装 `yuanshengwuxianpi`。如果 API 暂时不可达，可以先保留文件清单并在下一次运行时重试；API 成功后需要完全退出并重新打开原生 App，因为 registry 通常在进程启动时加载。
+
 ## 默认地址和配置
 
 service-manager endpoint 支持更改。调用方必须先读取配置或环境变量，最后才使用默认 fallback。

@@ -65,6 +65,8 @@
 
 组件注册只描述入口、桌面展示和 service-manager 引用；后台服务的命令、环境变量、停止方式和健康检查仍由 service-manager 管理。
 
+服务注册不会自动生成桌面入口。以 WuxianPi 为例，首次安装先确认 `yuanshengwuxianpi` 已写入 service-manager，再把 `pi-agent` 清单写入 `$HOME/.config/openhouseai/components.d/pi-agent.json`，并调用 registry API 的 `PUT /api/v1/registry/components/pi-agent` 与 `POST /api/v1/registry/sync`。两条链路都成功后，完全退出并重新打开原生 App，桌面和侧边栏才会加载新的 WuxianPi 图标；重复注册应只更新 `pi-agent`，不得覆盖其它组件。
+
 ## Operit
 
 Operit 只在 `withOperit` flavor 中显示为桌面 App。`withoutOperit` 不显示 Operit，不依赖 Operit，也不硬引用 Operit Java/Kotlin 包名。

@@ -113,7 +113,7 @@ safe_error_message
 | 9 | `install_node` | `install-node.sh` | Ubuntu | 安装 Ubuntu Node.js 24 LTS 和 npm 基础配置，供 AionUI、工作台和 AI CLI 工具使用。 |
 | 10 | `sync_official_docs` | `sync-official-docs.sh` | Ubuntu | 同步 `/root/openhouse/docs` 和 `/root/openhouse/scripts`。 |
 | 11 | `install_aionui` | `install-aionui.sh` | Ubuntu | 从 APK 内置离线包安装 AionUi 工作台，并检查本机入口。 |
-| 12 | `sync_openhouse_registry` | `sync-openhouse-registry.sh` | Termux + Ubuntu | 同步 OpenHouse registry、service-manager 服务定义和侧边栏入口，避免同名随机服务。 |
+| 12 | `sync_openhouse_registry` | `sync-openhouse-registry.sh` | Termux + Ubuntu | 先确认 `yuanshengwuxianpi` 服务，再独立写入 `components.d/pi-agent.json`，调用 registry apply/sync 并验证桌面、菜单和侧边栏入口，避免“服务已安装但没有图标”。 |
 
 核心长期服务目标：
 
@@ -141,7 +141,9 @@ safe_error_message
 | `install_node` | Ubuntu 内 `node --version` 和 `npm --version` 成功；版本符合固定版本范围；npm global bin 在 PATH。 | Node 下载失败；解包失败；PATH 未生效；版本不符合。 | 30min | `logs/install-node.log` | 使用默认 Node payload 或默认源重试。 | 使用国内固定 Node mirror 或内置 payload 重试，并校验 sha256。 |
 | `sync_official_docs` | `/root/openhouse/docs` 存在；P0 文档可读；`/root/openhouse/scripts/check-ai-tools.sh` 可执行。 | 文档目录缺失；脚本未同步；权限错误。 | 120s | `logs/sync-official-docs.log` | 重新同步 docs/scripts，不删除用户自有文件。 | 同常规重试。 |
 | `install_aionui` | AionUi 离线包完整；本机入口可打开；不污染 Termux native pi-agent/pi-web。 | 离线包缺失；解包失败；入口不可达；配置混用 service-manager token。 | 20min | `logs/install-aionui.log` | 重新解包并检查入口，不删除用户项目。 | 同常规重试。 |
-| `sync_openhouse_registry` | service-manager 服务定义使用稳定 ID；侧边栏入口定义存在；无同名随机重复服务。 | registry 写入失败；服务定义缺字段；重复服务未清理。 | 120s | `logs/sync-openhouse-registry.log` | 重新应用 registry，不删除用户数据。 | 同常规重试。 |
+| `sync_openhouse_registry` | `yuanshengwuxianpi` 服务定义使用稳定 ID；`components.d/pi-agent.json` 存在且四层结构完整；`GET /api/v1/registry/components` 返回 `pi-agent`；侧边栏和桌面入口定义存在；无同名随机重复服务。 | registry 写入失败；服务定义缺字段；组件清单损坏；重复服务或组件未清理。 | 120s | `logs/sync-openhouse-registry.log` | 重新应用 registry，不删除用户数据和其它组件。 | 同常规重试。 |
+
+WuxianPi 的救援市场首次安装插件也执行这一步，作为旧 APK 的兼容补救路径。插件更新不需要重新构建 APK；注册完成后必须重启原生 App，使进程重新加载 registry。
 ## 跳过规则
 
 阶段只有同时满足以下条件才允许 `skipped`：
