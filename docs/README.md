@@ -57,6 +57,8 @@ Termux native AI 优先读取 `/data/data/com.termux/files/home/openhouse/docs`�
 - `/root/openhouse/docs/GITHUB_CONFIG_HELPER.md`
 - `/root/openhouse/docs/OPENHOUSE_SYSTEM.md`
 - `/root/openhouse/docs/SERVICE_MANAGER.md`
+- `/root/openhouse/docs/ANDROID_TERMUX_CONTROL_PLANE.md`
+- `/root/openhouse/docs/OPENHOUSE_SMALL_APP_RUNTIME_CONTRACT.md`
 - `/root/openhouse/docs/CUSTOM_FRONTEND_AND_APPS.md`
 - `/root/openhouse/docs/OPENHOUSE_DESKTOP.md`
 - `/root/openhouse/docs/openhouse-runtime-policy.md`
@@ -143,6 +145,8 @@ App 工程架构设计文档位于 `openhouseai-app/docs/`，主要入口是 `AR
 - `TERMINAL_PROFILES.md`：Termux 终端、Ubuntu 终端和自定义终端的分工。
 - `OPENHOUSE_SYSTEM.md`：`openhouse-system` 的 subject 定义、`validate/render/describe/check`、检查类型和结果语义。
 - `SERVICE_MANAGER.md`：service-manager 的操作手册，强调安装完成后的运行控制平面。
+- `ANDROID_TERMUX_CONTROL_PLANE.md`：Android 通过 Termux 启动 service-manager 的固定入口、控制包、诊断和安全边界。
+- `OPENHOUSE_SMALL_APP_RUNTIME_CONTRACT.md`：小 App 从 registry 到服务启动、endpoint 和 WebView 的实际调用链与 API 契约。
 - `openhouse-runtime-policy.md`：App 前台自动保活和默认长期服务策略。
 - `openhouse-exit-all.md`：停止运行栈和全部退出 OpenHouse 的停止范围、界面行为、保留范围和恢复行为。
 - `openhouse-runtime-repair.md`：修复运行控制、注册表、端口健康和重复服务的规则。
